@@ -1,0 +1,123 @@
+.seller-dashboard {
+  padding: 140px 80px 60px;
+  background: #fff;
+}
+
+.seller-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.seller-header h1 {
+  font-family: serif;
+  font-size: 42px;
+  font-weight: 300;
+}
+
+.seller-header p {
+  color: #6b7280;
+}
+
+.primary-btn {
+  padding: 14px 32px;
+  background: #0f172a;
+  color: #fff;
+  border: none;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 60px;
+}
+
+.stat-card {
+  border: 1px solid #e5e7eb;
+  padding: 32px;
+}
+
+.stat-card p {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: #6b7280;
+}
+
+.stat-card h3 {
+  font-size: 36px;
+  font-weight: 300;
+}
+
+.listings h2 {
+  font-family: serif;
+  font-size: 28px;
+  margin-bottom: 24px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: #6b7280;
+  padding-bottom: 16px;
+}
+
+td {
+  padding: 20px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.item-cell {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.item-image {
+  width: 60px;
+  height: 60px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.muted {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.status {
+  padding: 6px 12px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+.status.available {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status.claimed {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status.completed {
+  background: #e5e7eb;
+  color: #111827;
+}

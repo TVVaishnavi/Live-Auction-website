@@ -1,0 +1,74 @@
+.verify-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 140px; 
+  background: #ffffff;
+}
+
+.verify-card {
+  width: 420px;
+  padding: 48px;
+  border: 1px solid #e5e7eb;
+}
+
+
+.verify-title {
+  font-family: serif;
+  font-size: 36px;
+  font-weight: 300;
+  text-align: center;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.verify-subtitle {
+  text-align: center;
+  color: #6b7280;
+  font-size: 15px;
+  margin-bottom: 40px;
+}
+
+.verify-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.verify-form label {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: #6b7280;
+}
+
+
+.verify-form input {
+  border: none;
+  border-bottom: 1px solid #d1d5db;
+  padding: 10px 0;
+  font-size: 15px;
+  outline: none;
+  background: transparent;
+}
+
+.verify-form button {
+  margin-top: 20px;
+  padding: 14px;
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+}
+
+.resend-btn {
+  margin-top: 28px;
+  background: none;
+  border: none;
+  color: #111827;
+  text-decoration: underline;
+  font-size: 14px;
+  cursor: pointer;
+}

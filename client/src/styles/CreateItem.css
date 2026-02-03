@@ -1,0 +1,88 @@
+.create-item-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.create-item-card {
+  width: 420px;
+  padding: 48px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.create-item-card h2 {
+  font-family: serif;
+  font-size: 32px;
+  font-weight: 300;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.create-item-card p {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 32px;
+}
+
+.image-upload {
+  margin-bottom: 24px;
+}
+
+.upload-box {
+  display: block;
+  text-align: center;
+  padding: 16px;
+  border: 1px dashed #d1d5db;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.image-preview {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.image-preview img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+}
+
+.create-item-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.create-item-form label {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: #6b7280;
+}
+
+.create-item-form input,
+.create-item-form textarea {
+  border: none;
+  border-bottom: 1px solid #d1d5db;
+  padding: 10px 0;
+  outline: none;
+}
+
+.create-item-form textarea {
+  min-height: 80px;
+  resize: none;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+}

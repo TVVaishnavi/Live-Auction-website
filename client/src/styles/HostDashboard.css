@@ -1,0 +1,155 @@
+.host-page {
+  max-width: 1100px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+.host-header h1 {
+  font-size: 48px;
+  font-weight: 500;
+  margin-top: 52px;
+}
+
+.host-header p {
+  color: #6b7280;
+  font-size: 18px;
+  margin-bottom: 40px;
+}
+
+.section {
+  margin-bottom: 50px;
+}
+
+.muted {
+  color: #6b7280;
+}
+
+.item-card,
+.auction-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  padding: 20px;
+  margin-bottom: 14px;
+}
+
+.price {
+  font-size: 18px;
+  margin-top: 8px;
+}
+
+.claimed-btn {
+  background: #e5e7eb;
+  border: none;
+  padding: 10px 18px;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.remove-btn {
+  font-size: 22px;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #d1d5db;
+  padding: 12px 0;
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+.upload-box {
+  border: 2px dashed #d1d5db;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.upload-box img {
+  max-width: 100%;
+  border-radius: 6px;
+}
+
+.upload-btn {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #2563eb;
+}
+
+.primary-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 14px 24px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.auction-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  background: #fff;
+}
+
+.auction-header {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.auction-header h3 {
+  font-size: 26px;
+  font-weight: 500;
+}
+
+.auction-meta {
+  display: flex;
+  gap: 18px;
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.toggle-btn {
+  font-size: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.auction-body {
+  border-top: 1px solid #e5e7eb;
+  padding: 24px;
+}
+
+.auction-body h4 {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 12px;
+  font-size: 13px;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 15px;
+}
