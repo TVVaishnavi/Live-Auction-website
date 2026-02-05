@@ -80,8 +80,14 @@ exports.login = async (req, res) => {
       { expiresIn: "2h" }
     );
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,      
+      sameSite: "lax",
+      maxAge: 2 * 60 * 60 * 1000,
+    });
+
     res.json({
-      token,
       user: {
         name: user.name,
         email: user.email,
@@ -93,3 +99,4 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Login failed" });
   }
 };
+

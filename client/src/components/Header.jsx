@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import  { useAuth } from '../hooks/useAuth';
 import "../styles/Header.css";
 
 export default function Header() {
@@ -7,7 +8,8 @@ export default function Header() {
     const [user, setUser] = useState(null);
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
-    const location = useLocation(); 
+    const location = useLocation();
+    const { getMe } = useAuth();
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 10);
@@ -16,14 +18,19 @@ export default function Header() {
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
 
+
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        } else {
-            setUser(null);
-        }
-    }, [location.pathname]); 
+        const loadUser = async () => {
+            try {
+                const res = await getMe();
+                setUser(res.user);
+            } catch {
+                setUser(null);
+            }
+        };
+
+        loadUser();
+    }, [location.pathname]);
 
     const logout = () => {
         localStorage.clear();

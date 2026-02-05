@@ -8,16 +8,18 @@ export function useAuth() {
     apiFetch("/auth/verify-email", "POST", payload);
 
   const login = async (payload) => {
-    const data = await apiFetch("/auth/login", "POST", payload);
-
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-
-    console.log("LOGIN TOKEN:", data.token);
-    return data;
+    const user = await apiFetch("/auth/login", "POST", payload);
+    return user;
   };
 
-  const logout = () => localStorage.clear();
+  const logout = async () => {
+    await apiFetch("/auth/logout", "POST");
+  };
 
-  return { signup, verifyEmail, login, logout };
+  const getMe = async () => {
+    return apiFetch("/auth/me");
+  };
+
+
+  return { signup, verifyEmail, login, logout, getMe };
 }

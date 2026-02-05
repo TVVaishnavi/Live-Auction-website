@@ -25,10 +25,6 @@ function Login() {
     try {
       const res = await login(form);
 
-      localStorage.clear();
-      localStorage.setItem("token", res.token);
-      localStorage.setItem("user", JSON.stringify(res.user));
-
       if (res.user.role === "HOST") navigate("/host");
       else if (res.user.role === "SELLER") navigate("/seller");
       else navigate("/");
