@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Header.css";
 
 export default function Header() {
@@ -7,16 +7,23 @@ export default function Header() {
     const [user, setUser] = useState(null);
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation(); 
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 10);
         window.addEventListener("scroll", onScroll);
 
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) setUser(JSON.parse(storedUser));
-
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        } else {
+            setUser(null);
+        }
+    }, [location.pathname]); 
 
     const logout = () => {
         localStorage.clear();
@@ -54,7 +61,7 @@ export default function Header() {
                                 className="profile-avatar"
                                 onClick={() => setOpen(!open)}
                             >
-                                {user.name.charAt(0).toUpperCase()}
+                                {user.name?.charAt(0).toUpperCase()}
                             </div>
 
                             {open && (

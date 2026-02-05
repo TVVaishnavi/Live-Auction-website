@@ -20,9 +20,12 @@ function RegisteredAuctions({ auctions }) {
       )}
 
       {auctions.map((reg) => {
-        const item = reg.auctionItemId;
-        const auctionKey = `${item.liveTitle}-${item.startTime}`;
+        const item = reg.auctionItemId || reg;
 
+        if (!item) return null;
+        if (item.status === "CLOSED" || item.status === "COMPLETED") return null;
+
+        const auctionKey = `${item.liveTitle}-${item.startTime}`;
         const canJoin = canJoinAuction(item.startTime);
 
         return (
@@ -31,13 +34,12 @@ function RegisteredAuctions({ auctions }) {
             <p className="desc">{item.liveDescription}</p>
 
             <p style={{ color: "green", fontWeight: 500, marginTop: "8px" }}>
-              ✅ You have been registered for this auction
-            </p>
+               You have been registered for this auction
+            </p> 
 
             <div className="meta">
               <span>📅 {new Date(item.startTime).toDateString()}</span>
               <span>⏰ {new Date(item.startTime).toLocaleTimeString()}</span>
-              <span>📦 Starting ₹{item.startingPrice}</span>
             </div>
 
             <div className="meet">

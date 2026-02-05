@@ -1,6 +1,6 @@
 const AuctionItem = require("../models/auctionItem");
-const AuctionRegistration = require("../models/auctionRegister");
 const Bid = require("../models/bid");
+const Auction = require("../models/auction");
 
 exports.getAvailableItems = async () => {
   return AuctionItem.find({ status: "AVAILABLE" })
@@ -51,35 +51,29 @@ exports.getRegistrations = async (auctionKey) => {
     .populate("userId", "name email");
 };
 
-exports.getUpcomingAuctions = async (hostId) => {
-  return AuctionItem.find({
-    hostId,
-    status: "SCHEDULED",
-    published: true,
-    startTime: { $gt: new Date() },
-  });
-};
-
-exports.startAuction = async (hostId, auctionKey) => {
-  return AuctionItem.updateMany(
-    {
-      hostId,
-      status: "SCHEDULED",
-      $expr: {
-        $eq: [
-          { $concat: ["$liveTitle", "-", { $toString: "$startTime" }] },
-          auctionKey,
-        ],
-      },
-    },
-    { status: "LIVE" }
-  );
-};
-
 
 exports.getPreviousAuctions = async (hostId) => {
   return AuctionItem.find({
     hostId,
-    status: "CLOSED",
-  });
+    status: "COMPLETED",
+  })
+    .populate("sellerId", "name email")
+    .sort({ updatedAt: -1 });
+};
+
+exports.autoCompleteExpiredAuctions = async () => {
+  const now = new Date();
+
+  await AuctionItem.updateMany(
+    {
+      status: "LIVE",
+      $expr: {
+        $lt: [
+          { $add: ["$startTime", { $multiply: ["$durationMinutes", 60000] }] },
+          now,
+        ],
+      },
+    },
+    { status: "COMPLETED" }
+  );
 };

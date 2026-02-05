@@ -19,7 +19,7 @@ function App(){
       <Route path='/host' element={<HostDashboard/>}/>
       <Route path='/' element={<Home/>}/>
       <Route path='/bidder' element={<BidderDashboard/>}/>
-      <Route path='/hostlive/:auctionkey' element={<HostLiveAuction/>}/>
+      <Route path="/hostlive/:auctionKey" element={<HostLiveAuction />} />
       <Route path='/bidlive/:auctionkey' element={<BidderLiveAuction/>}/>
     </Routes>
   )

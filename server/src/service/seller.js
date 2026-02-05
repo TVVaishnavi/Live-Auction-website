@@ -25,13 +25,16 @@ exports.createItem = async (sellerId, data) => {
     title,
     description,
     startingPrice,
-    images, 
+    images,
     sellerId,
-    status: "AVAILABLE",
+    status: "AVAILABLE",   
+    auctionId: null,      
+    hostId: null,
   });
 
   return item;
 };
+
 
 exports.getMyItems = async (sellerId) => {
   return await AuctionItem.find({ sellerId })

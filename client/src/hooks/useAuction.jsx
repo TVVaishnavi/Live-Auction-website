@@ -2,119 +2,91 @@ import { apiFetch } from "../api/api";
 
 export function useAuction() {
 
-    const createAuctionItem = async (payload) => {
-        return apiFetch("/items", "POST", payload);
-    };
+  /* =======================
+     SELLER / ITEM ACTIONS
+     ======================= */
 
-    const getMyAuctionItems = async () => {
-        return apiFetch("/items/my");
-    };
+  const createAuctionItem = async (payload) => {
+    return apiFetch("/items", "POST", payload);
+  };
 
-    const getAvailableItems = async () => {
-        return apiFetch("/items/available");
-    };
+  const getMyAuctionItems = async () => {
+    return apiFetch("/items/my");
+  };
 
-    const getClaimedItems = async () => {
-        return apiFetch("/items/my/claimed");
-    };
+  const getAvailableItems = async () => {
+    return apiFetch("/items/available");
+  };
 
-    const claimItem = async (itemId) => {
-        return apiFetch(`/items/${itemId}/claim`, "POST");
-    };
+  const getClaimedItems = async () => {
+    return apiFetch("/items/my/claimed");
+  };
 
-    const finalizeAuctionItem = async (itemId, payload) => {
-        return apiFetch(`/items/${itemId}/finalize`, "PUT", payload);
-    };
+  const claimItem = async (itemId) => {
+    return apiFetch(`/items/${itemId}/claim`, "POST");
+  };
 
-    const scheduleAuction = async (itemId, payload) => {
-        return apiFetch(
-            `/items/${itemId}/schedule`,
-            "POST",
-            payload
-        );
-    };
+  const scheduleAuctionItem = async (itemId, payload) => {
+    return apiFetch(`/items/${itemId}/schedule`, "POST", payload);
+  };
 
-    const publishAuction = async (itemId) => {
-        return apiFetch(
-            `/items/${itemId}/publish`,
-            "POST"
-        );
-    };
+  /* =======================
+     AUCTION (NEW SYSTEM)
+     ======================= */
 
+  // ✅ Create auction (this replaces publishAuction)
+  const createAuction = async (payload) => {
+    return apiFetch("/auctions", "POST", payload);
+  };
 
-    const getPublishedAuctions = async () => {
-        return apiFetch("/items/published");
-    };
+  // ✅ Home page (public)
+  const getUpcomingAuctions = async () => {
+    return apiFetch("/auctions/upcoming");
+  };
 
-    const registerForAuction = async (auctionKey) => {
-        return apiFetch(
-            `/items/${encodeURIComponent(auctionKey)}/register`,
-            "POST"
-        );
-    };
+  // ✅ Host dashboard
+  const getHostUpcomingAuctions = async () => {
+    return apiFetch("/auctions/my/upcoming");
+  };
 
+  const startAuction = async (auctionId) => {
+    return apiFetch(`/auctions/${auctionId}/start`, "POST");
+  };
 
+  /* =======================
+     REGISTRATION / USER
+     ======================= */
 
-    const getMyRegistrations = async () => {
-        return apiFetch("/items/my/registrations");
-    };
+  const registerForAuction = async (auctionId) => {
+    return apiFetch(`/auctions/${auctionId}/register`, "POST");
+  };
 
-    const getMyWins = async () => {
-        return apiFetch("/items/my/wins");
-    };
+  const getMyRegistrations = async () => {
+    return apiFetch("/items/my/registrations");
+  };
 
-    const getMyHostedAuctions = async () => {
-        return apiFetch("/items/my/hosted");
-    };
+  const getMyWins = async () => {
+    return apiFetch("/auctions/my/wins");
+  };
 
-    const getHostAuctionRegistrations = async (liveTitle, startTime) => {
-        return apiFetch(
-            `/items/host/auction/registrations?liveTitle=${encodeURIComponent(
-                liveTitle
-            )}&startTime=${encodeURIComponent(startTime)}`
-        );
-    };
-    const isRegisteredForAuction = async (auctionKey) => {
-        return apiFetch(
-            `/items/${encodeURIComponent(auctionKey)}/is-registered`
-        );
-    };
+  return {
+    // items
+    createAuctionItem,
+    getMyAuctionItems,
+    getAvailableItems,
+    claimItem,
+    getClaimedItems,
+    scheduleAuctionItem,
 
-    const getHostUpcomingAuctions = async () => {
-        return apiFetch("/items/my/upcoming");
-    };
+    // auctions
+    createAuction,
+    getUpcomingAuctions,
+    getHostUpcomingAuctions,
+    startAuction,
 
-    const getHostPreviousAuctions = async () => {
-        return apiFetch("/items/my/previous");
-    };
-
-    const startAuction = async (auctionKey) => {
-        return apiFetch(
-            `/items/${encodeURIComponent(auctionKey)}/start`,
-            "POST"
-        );
-    };
-
-
-
-    return {
-        createAuctionItem,
-        getMyAuctionItems,
-        getAvailableItems,
-        claimItem,
-        getClaimedItems,
-        scheduleAuction,
-        publishAuction,
-        getPublishedAuctions,
-        registerForAuction,
-        getMyRegistrations,
-        getMyWins,
-        getMyHostedAuctions,
-        finalizeAuctionItem,
-        getHostAuctionRegistrations,
-        isRegisteredForAuction,
-        getHostUpcomingAuctions,
-        getHostPreviousAuctions,
-        startAuction,
-    };
+    // user
+    registerForAuction,
+    getMyRegistrations,
+    getMyWins,
+  };
 }

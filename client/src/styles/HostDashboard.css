@@ -24,27 +24,29 @@
   color: #6b7280;
 }
 
-.item-card,
-.auction-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid #e5e7eb;
-  padding: 20px;
-  margin-bottom: 14px;
+.item-card {
+  background: #1f2937; /* dark slate */
+  border: 1px solid #374151;
+  color: #f9fafb; /* base text color */
 }
 
-.price {
-  font-size: 18px;
-  margin-top: 8px;
+.item-card h3 {
+  color: #ffffff;
+}
+
+.item-card .price {
+  color: #e5e7eb;
+  font-weight: 500;
+}
+
+.item-card .muted {
+  color: #9ca3af; 
 }
 
 .claimed-btn {
-  background: #e5e7eb;
-  border: none;
-  padding: 10px 18px;
-  font-size: 13px;
-  letter-spacing: 1px;
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 4px;
 }
 
 .remove-btn {

@@ -3,7 +3,7 @@ import { useAuction } from "../hooks/useAuction";
 import "../styles/hostDashboard.css";
 
 export default function MyAuctionList() {
-  const { getClaimedItems, scheduleAuction, publishAuction } = useAuction();
+  const { getClaimedItems, createAuction } = useAuction();
   const [items, setItems] = useState([]);
   const [image, setImage] = useState("");
   const [form, setForm] = useState({
@@ -24,22 +24,21 @@ export default function MyAuctionList() {
 
 
   const postAuction = async () => {
-    if (items.length < 5) return alert("Minimum 5 items required");
-
-    for (const item of items) {
-      await scheduleAuction(item._id, {
-        liveTitle: form.auctionName,
-        liveDescription: form.description,
-        meetLink: form.meetLink,
-        startTime: form.startTime,
-        auctionImage: image,
-      });
-
-      await publishAuction(item._id);
+    if (items.length < 5) {
+      return alert("Minimum 5 items required");
     }
 
-    alert("Auction posted successfully");
+    await createAuction({
+      title: form.auctionName,
+      description: form.description,
+      startTime: form.startTime,
+      meetLink: form.meetLink,
+      itemIds: items.map(i => i._id),
+    });
+
+    alert("Auction created successfully");
   };
+
 
   return (
     <section className="section">

@@ -6,6 +6,11 @@ const auctionItemSchema = new mongoose.Schema(
         description: String,
         startingPrice: Number,
 
+        auctionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Auction",
+        },
+
         sellerId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
@@ -19,10 +24,6 @@ const auctionItemSchema = new mongoose.Schema(
                 message: "1–5 images required",
             },
         },
-
-
-        liveTitle: String,
-        liveDescription: String,
 
         hostId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -39,9 +40,10 @@ const auctionItemSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: ["AVAILABLE", "CLAIMED", "SCHEDULED", "LIVE", "CLOSED"],
+            enum: ["AVAILABLE", "CLAIMED", "ASSIGNED", "SOLD"],
             default: "AVAILABLE",
         },
+
 
         winnerName: {
             type: String,
@@ -53,13 +55,6 @@ const auctionItemSchema = new mongoose.Schema(
             default: null,
         },
 
-        startTime: Date,
-        meetLink: String,
-
-        published: {
-            type: Boolean,
-            default: false,
-        },
     },
     { timestamps: true }
 );

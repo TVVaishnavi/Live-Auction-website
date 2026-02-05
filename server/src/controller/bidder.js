@@ -1,28 +1,24 @@
 const bidderService = require("../service/bidder");
 
 exports.register = async (req, res) => {
-  const auctionKey = decodeURIComponent(req.params.auctionKey);
-
-  const reg = await bidderService.registerAuction(
-    auctionKey,
-    req.user.userId
-  );
-
-  res.status(201).json(reg);
+  try {
+    const data = await bidderService.registerAuction(
+      req.params.auctionId,
+      req.user.userId
+    );
+    res.status(201).json(data);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
-
 
 exports.isRegistered = async (req, res) => {
-  const auctionKey = decodeURIComponent(req.params.auctionKey);
-
   const registered = await bidderService.isRegistered(
-    auctionKey,
+    req.params.auctionId,
     req.user.userId
   );
-
   res.json({ registered });
 };
-
 
 exports.placeBid = async (req, res) => {
   const bid = await bidderService.placeBid(

@@ -47,32 +47,6 @@ exports.registrations = async (req, res) => {
   res.json(users);
 };
 
-exports.myUpcomingAuctions = async (req, res) => {
-  try {
-    const auctions = await hostService.getUpcomingAuctions(
-      req.user.userId
-    );
-    res.json(auctions);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-exports.startAuction = async (req, res) => {
-  try {
-    const auctionKey = decodeURIComponent(req.params.auctionKey);
-
-    await hostService.startAuction(
-      req.user.userId,
-      auctionKey
-    );
-
-    res.json({ started: true });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
 exports.myPreviousAuctions = async (req, res) => {
   try {
     const auctions = await hostService.getPreviousAuctions(
@@ -83,3 +57,18 @@ exports.myPreviousAuctions = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.myPreviousAuctions = async (req, res) => {
+  try {
+    await hostService.autoCompleteExpiredAuctions();
+
+    const auctions = await hostService.getPreviousAuctions(
+      req.user.userId
+    );
+
+    res.json(auctions);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+

@@ -67,7 +67,7 @@ function SellerDashboard() {
                         <tr>
                             <th>ITEM</th>
                             <th>STARTING PRICE</th>
-                            <th>CURRENT BID</th>
+                            <th>FINAL PRICE</th>
                             <th>STATUS</th>
                         </tr>
                     </thead>
