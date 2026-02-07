@@ -16,7 +16,7 @@ export async function uploadToCloudinary(files) {
 
     const data = await res.json();
 
-    console.log("CLOUDINARY RESPONSE:", data); // 👈 VERY IMPORTANT
+    console.log("CLOUDINARY RESPONSE:", data); 
 
     if (!res.ok) {
       throw new Error(data.error?.message || "Upload failed");

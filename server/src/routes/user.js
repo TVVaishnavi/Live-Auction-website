@@ -9,7 +9,7 @@ router.post("/verify-email", authService.verifyEmail);
 router.post("/login", authService.login);
 router.get("/me", requireAuth, async (req, res) => {
   const user = await User.findById(req.user.userId).select(
-    "name email role"
+    "id name email role"
   );
 
   if (!user) {

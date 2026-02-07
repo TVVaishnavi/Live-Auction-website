@@ -27,7 +27,7 @@ function Home() {
     };
 
     const openAuction = (auction) => {
-        setIsRegistered(false); // later we’ll wire real check
+        setIsRegistered(false);
         setSelectedAuction(auction);
     };
 
@@ -38,7 +38,7 @@ function Home() {
             alert("Registered successfully!");
         } catch (err) {
             console.error("Register failed:", err);
-            alert("Registration failed");
+            alert("You have already registered, please check in your dashboard.");
         }
     };
 

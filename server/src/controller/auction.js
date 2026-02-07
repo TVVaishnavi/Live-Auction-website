@@ -1,4 +1,5 @@
 const auctionService = require("../service/auction");
+const Auction = require("../models/auction");
 
 exports.createAuction = async (req, res) => {
   const auction = await auctionService.createAuction(
@@ -39,4 +40,61 @@ exports.registerForAuction = async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
+};
+
+exports.getLiveAuction = async (req, res) => {
+  try {
+    const auction = await Auction.findById(req.params.auctionId)
+      .populate("items")
+      .populate("hostId", "name email");
+
+    if (!auction) {
+      return res.status(404).json({ message: "Auction not found" });
+    }
+
+    res.json(auction);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.nextItem = async (req, res) => {
+  const auction = await Auction.findById(req.params.auctionId);
+
+  if (!auction) {
+    return res.status(404).json({ message: "Auction not found" });
+  }
+
+  auction.currentItemIndex += 1;
+  await auction.save();
+
+  res.json({
+    currentItemIndex: auction.currentItemIndex,
+  });
+};
+
+exports.completeItem = async (req, res) => {
+  try {
+    const { itemId, winner, bids } = req.body;
+    await AuctionItem.findByIdAndUpdate(itemId, {
+      status: "SOLD",
+      winnerName: winner?.userId || null,
+      finalPrice: winner?.amount || null,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getAuctionById = async (req, res) => {
+  const auction = await Auction.findById(req.params.auctionId)
+    .populate("items");
+
+  if (!auction) {
+    return res.status(404).json({ message: "Auction not found" });
+  }
+
+  res.json(auction);
 };

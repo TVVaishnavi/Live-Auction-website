@@ -31,4 +31,18 @@ router.post(
   auctionController.registerForAuction
 );
 
+
+router.post(
+  "/:auctionId/complete-item",
+  requireAuth,
+  requireRole("HOST"),
+  auctionController.completeItem
+);
+
+router.get(
+  "/:auctionId",
+  requireAuth,
+  auctionController.getAuctionById
+);
+
 module.exports = router;

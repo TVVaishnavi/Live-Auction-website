@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const { requireAuth, requireRole } = require("../middleware/auth");
 const hostController = require("../controller/host");
-const AuctionItem = require('../models/auctionItem');
+
 router.get(
   "/available",
   requireAuth,

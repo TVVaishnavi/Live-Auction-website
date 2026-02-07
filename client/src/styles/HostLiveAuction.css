@@ -74,3 +74,8 @@
   overflow: visible;
   white-space: normal;
 }
+.item-row.sold {
+  opacity: 0.4;
+  text-decoration: line-through;
+  pointer-events: none;
+}

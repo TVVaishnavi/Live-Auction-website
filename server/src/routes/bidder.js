@@ -15,12 +15,6 @@ router.get(
   bidderController.isRegistered
 );
 
-router.post(
-  "/items/:itemId/bid",
-  requireAuth,
-  requireRole("BIDDER"),
-  bidderController.placeBid
-);
 
 router.get(
   "/my/registrations",

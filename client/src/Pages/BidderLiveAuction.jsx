@@ -1,107 +1,178 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useAuction } from "../hooks/useAuction";
+import socket from "../socket";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import "../styles/BidderLiveAuction.css";
 
 export default function BidderLiveAuction() {
+  console.log("🔥 BIDDER LIVE COMPONENT MOUNTED 🔥");
+
+  const { auctionId } = useParams();
+  console.log("🧪 auctionId:", auctionId);
   const [activeItem, setActiveItem] = useState(null);
   const [bids, setBids] = useState([]);
-  const [bidAmount, setBidAmount] = useState("");
-  const { auctionKey } = useParams();
-  const { getLiveAuctionState} = useAuction();
+  const [amount, setAmount] = useState("");
+  const [countdown, setCountdown] = useState(null);
+  const [winner, setWinner] = useState(null);
+
+
+  const { getMe } = useAuth();
+
+  const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const loadLiveAuction = async () => {
-      const data = await getLiveAuctionState(auctionKey);
-      setActiveItem(data.activeItem);
-      setBids(data.bids);
+    const onAuctionEnded = () => {
+      navigate("/bidder/dashboard");
     };
 
-    loadLiveAuction();
+    socket.on("auction-ended", onAuctionEnded);
+    return () => socket.off("auction-ended", onAuctionEnded);
+  }, []);
 
-    const interval = setInterval(loadLiveAuction, 2000);
-    return () => clearInterval(interval);
-  }, [auctionKey]);
+  useEffect(() => {
+    getMe()
+      .then(res => setUser(res.user))
+      .catch(() => setUser(null))
+      .finally(() => setAuthChecked(true));
+  }, []);
+
+  useEffect(() => {
+    if (!auctionId) return;
+
+    const onItemLive = (item) => {
+      console.log("📦 ITEM RECEIVED:", item);
+      setActiveItem(item);
+      setBids([]);
+      setWinner(null);
+      setCountdown(null);
+    };
+
+    const onBidUpdated = (bid) => {
+      setBids((prev) => [bid, ...prev]);
+    };
+
+    const onCountdown = (num) => {
+      setCountdown(num);
+    };
+
+    const onWinner = (data) => {
+      setWinner(data.winner);
+      setCountdown(null);
+    };
+
+    // ✅ 1. REGISTER LISTENERS FIRST
+    socket.on("item-live", onItemLive);
+    socket.on("bid-updated", onBidUpdated);
+    socket.on("countdown", onCountdown);
+    socket.on("winner-declared", onWinner);
+
+    // ✅ 2. THEN CONNECT + JOIN
+    const joinAuction = () => {
+      console.log("🟢 BIDDER joining auction:", auctionId);
+
+      socket.emit("join-auction", {
+        auctionId,
+        role: "BIDDER",
+        userId: "ANON",
+      });
+    };
+
+    if (!socket.connected) {
+      socket.connect();
+      socket.on("connect", joinAuction);
+    } else {
+      joinAuction();
+    }
+
+    return () => {
+      socket.off("item-live", onItemLive);
+      socket.off("bid-updated", onBidUpdated);
+      socket.off("countdown", onCountdown);
+      socket.off("winner-declared", onWinner);
+      socket.off("connect", joinAuction);
+    };
+  }, [auctionId]);
+
+
 
 
   const placeBid = () => {
-    if (!bidAmount) return;
+    if (!amount || !activeItem || countdown !== null || winner) return;
 
-    setBids((prev) => [
-      {
-        bidderName: "You",
-        amount: bidAmount,
-        createdAt: new Date(),
-      },
-      ...prev,
-    ]);
+    socket.emit("place-bid", {
+      auctionId,
+      itemId: activeItem._id,
+      amount: Number(amount),
+      userId: user._id,
+      userName: user.name,
+      userEmail: user.email,
+    });
 
-    setBidAmount("");
+    setAmount("");
   };
 
   return (
     <div className="live-container">
-      {/* HEADER */}
       <header className="live-header">
-        <div>
-          <h1>LIVE AUCTION</h1>
-          <p>Spring Art Collection - February 15, 2026</p>
-        </div>
-
-        <div className="view-toggle">
-          <button>HOST VIEW</button>
-          <button className="active">BIDDER VIEW</button>
-          <span className="live-dot">● LIVE</span>
-        </div>
+        <h1>BIDDER LIVE</h1>
+        <span className="live-dot">● LIVE</span>
       </header>
 
-      {/* MAIN PANEL */}
-      <section className="main-panel">
-        {!activeItem ? (
-          <div className="empty-state">
-            <div className="clock-icon">⏱</div>
-            <h2>Waiting for Auction to Start</h2>
-            <p>The host will begin the auction shortly</p>
+      {!activeItem ? (
+        <div className="empty-state">
+          <h2>Waiting for host…</h2>
+          <p>The auction will start shortly</p>
+        </div>
+      ) : (
+        <div className="active-item">
+          <h2>{activeItem.title}</h2>
+          <p className="desc">{activeItem.description}</p>
+          <img src={activeItem.images?.[0]} alt={activeItem.title} />
+          <p className="price">
+            Starting Price: ₹{activeItem.startingPrice}
+          </p>
+
+          <div className="bid-box">
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              disabled={countdown !== null || winner}
+            />
+            <button
+              onClick={placeBid}
+              disabled={countdown !== null || winner}
+            >
+              Place Bid
+            </button>
           </div>
-        ) : (
-          <div className="active-item">
-            <h2>{activeItem.title}</h2>
+        </div>
+      )}
 
-            <img src={activeItem.images[0]} alt="" />
+      {countdown !== null && <h1>{countdown}</h1>}
 
-            <p className="desc">{activeItem.description}</p>
+      {winner && (
+        <div className="winner">
+          <h2>🏆 Winner: {winner.userName}</h2>
+          <p>{winner.userEmail}</p>
+          <strong>₹{winner.amount}</strong>
+        </div>
+      )}
 
-            <p className="price">
-              Current Bid: ₹{activeItem.currentBid}
-            </p>
-
-            <div className="bid-box">
-              <input
-                type="number"
-                placeholder="Enter your bid"
-                value={bidAmount}
-                onChange={(e) => setBidAmount(e.target.value)}
-              />
-              <button onClick={placeBid}>Place Bid</button>
-            </div>
-          </div>
-        )}
-      </section>
-
-      {/* BID HISTORY */}
       <section className="bid-history">
-        <h3>Bid History</h3>
-
+        <h3>Live Bids</h3>
         {bids.length === 0 ? (
-          <div className="no-bids">
-            <p>No bids yet</p>
-            <span>Be the first to bid!</span>
-          </div>
+          <p>No bids yet</p>
         ) : (
-          bids.map((bid, i) => (
+          bids.map((b, i) => (
             <div key={i} className="bid-row">
-              <span>{bid.bidderName}</span>
-              <span>₹{bid.amount}</span>
+              <span>{b.userName}</span>
+              <span>{b.userEmail}</span>
+              <strong>₹{b.amount}</strong>
             </div>
           ))
         )}

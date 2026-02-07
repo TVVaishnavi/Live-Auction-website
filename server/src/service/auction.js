@@ -73,3 +73,24 @@ exports.registerForAuction = async (auctionId, userId) => {
 
   return auction;
 };
+
+exports.moveToNextItem = async (auctionId, hostId) => {
+  const auction = await Auction.findOne({
+    _id: auctionId,
+    hostId,
+  });
+
+  if (!auction) throw new Error("Auction not found");
+
+  if (auction.currentItemIndex >= auction.items.length - 1) {
+    throw new Error("No more items");
+  }
+
+  auction.currentItemIndex += 1;
+  auction.currentBid = null;
+  auction.highestBidder = null;
+  auction.bidHistory = [];
+
+  await auction.save();
+  return auction;
+};

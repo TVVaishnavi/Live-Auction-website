@@ -30,6 +30,11 @@ const auctionSchema = new mongoose.Schema(
       type: String,
     },
 
+    currentItemIndex: {
+      type: Number,
+      default: 0,
+    },
+
     status: {
       type: String,
       enum: ["UPCOMING", "LIVE", "COMPLETED"],
@@ -50,7 +55,7 @@ const auctionSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Auction", auctionSchema);

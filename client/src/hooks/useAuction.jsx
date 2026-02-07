@@ -2,10 +2,6 @@ import { apiFetch } from "../api/api";
 
 export function useAuction() {
 
-  /* =======================
-     SELLER / ITEM ACTIONS
-     ======================= */
-
   const createAuctionItem = async (payload) => {
     return apiFetch("/items", "POST", payload);
   };
@@ -30,21 +26,16 @@ export function useAuction() {
     return apiFetch(`/items/${itemId}/schedule`, "POST", payload);
   };
 
-  /* =======================
-     AUCTION (NEW SYSTEM)
-     ======================= */
-
-  // ✅ Create auction (this replaces publishAuction)
   const createAuction = async (payload) => {
     return apiFetch("/auctions", "POST", payload);
   };
 
-  // ✅ Home page (public)
+
   const getUpcomingAuctions = async () => {
     return apiFetch("/auctions/upcoming");
   };
 
-  // ✅ Host dashboard
+
   const getHostUpcomingAuctions = async () => {
     return apiFetch("/auctions/my/upcoming");
   };
@@ -53,9 +44,7 @@ export function useAuction() {
     return apiFetch(`/auctions/${auctionId}/start`, "POST");
   };
 
-  /* =======================
-     REGISTRATION / USER
-     ======================= */
+
 
   const registerForAuction = async (auctionId) => {
     return apiFetch(`/auctions/${auctionId}/register`, "POST");
@@ -69,8 +58,16 @@ export function useAuction() {
     return apiFetch("/auctions/my/wins");
   };
 
+  const completeAuctionItem = async (auctionId, payload) => {
+    return apiFetch(`/auctions/${auctionId}/complete-item`, "POST", payload);
+  };
+
+  const getAuctionById = async (auctionId) => {
+    return apiFetch(`/auctions/${auctionId}`);
+  };
+
+
   return {
-    // items
     createAuctionItem,
     getMyAuctionItems,
     getAvailableItems,
@@ -78,15 +75,15 @@ export function useAuction() {
     getClaimedItems,
     scheduleAuctionItem,
 
-    // auctions
     createAuction,
     getUpcomingAuctions,
     getHostUpcomingAuctions,
     startAuction,
 
-    // user
     registerForAuction,
     getMyRegistrations,
     getMyWins,
+    completeAuctionItem,
+    getAuctionById,
   };
 }

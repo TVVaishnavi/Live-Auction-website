@@ -1,10 +1,6 @@
 const Auction = require("../models/auction");
 const AuctionItem = require("../models/auctionItem");
-const Bid = require("../models/bid");
 
-/* =========================
-   REGISTER FOR AUCTION
-   ========================= */
 exports.registerAuction = async (auctionId, userId) => {
   const auction = await Auction.findById(auctionId);
 
@@ -26,9 +22,6 @@ exports.registerAuction = async (auctionId, userId) => {
   return { registered: true };
 };
 
-/* =========================
-   CHECK REGISTRATION
-   ========================= */
 exports.isRegistered = async (auctionId, userId) => {
   const auction = await Auction.findById(auctionId);
   if (!auction) return false;
@@ -36,20 +29,6 @@ exports.isRegistered = async (auctionId, userId) => {
   return auction.registeredUsers.includes(userId);
 };
 
-/* =========================
-   PLACE BID
-   ========================= */
-exports.placeBid = async (itemId, userId, amount) => {
-  return Bid.create({
-    auctionItemId: itemId,
-    bidderId: userId,
-    amount,
-  });
-};
-
-/* =========================
-   MY REGISTRATIONS
-   ========================= */
 exports.myRegistrations = async (userId) => {
   return Auction.find({
     registeredUsers: userId,

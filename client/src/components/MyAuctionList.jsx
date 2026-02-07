@@ -5,7 +5,6 @@ import "../styles/hostDashboard.css";
 export default function MyAuctionList() {
   const { getClaimedItems, createAuction } = useAuction();
   const [items, setItems] = useState([]);
-  const [image, setImage] = useState("");
   const [form, setForm] = useState({
     auctionName: "",
     meetLink: "",

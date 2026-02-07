@@ -17,8 +17,8 @@ export default function HostDashboard() {
 
   const fetchHostAuctions = async () => {
     try {
-      const upcomingAuctions = await getHostUpcomingAuctions();
-      setUpcoming(upcomingAuctions);
+      const data = await getHostUpcomingAuctions();
+      setUpcoming(data);
     } catch (err) {
       console.error("Failed to load host auctions", err);
     }
@@ -34,6 +34,8 @@ export default function HostDashboard() {
     return diffMinutes <= 20 && diffMinutes >= 0;
   };
 
+  
+
   return (
     <div className="host-page">
       <header className="host-header">
@@ -41,6 +43,7 @@ export default function HostDashboard() {
         <p>Manage auction items and schedule events</p>
       </header>
 
+      {/* seller related */}
       <AvailableAuctionItems />
       <MyAuctionList />
 
@@ -67,8 +70,12 @@ export default function HostDashboard() {
               <button
                 disabled={!canStart}
                 onClick={async () => {
+                  // mark auction as LIVE in backend
                   await startAuction(auction._id);
-                  navigate(`/hostlive/${auction._id}`);
+
+                  // 🔥 go to REAL live auction page
+                  navigate(`/host/live/${auction._id}`);
+
                 }}
               >
                 {canStart

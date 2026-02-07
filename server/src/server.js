@@ -1,23 +1,28 @@
 const express = require("express");
+const http = require("http");
 const cors = require("cors");
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 
 const connectDB = require("./config/dbConfig");
+const { initSocket } = require("./socket");
+
 const userRoutes = require("./routes/user");
 const sellerRoutes = require("./routes/seller");
 const hostRoutes = require("./routes/host");
-const bidderRoutes = require('./routes/bidder');
+const bidderRoutes = require("./routes/bidder");
 const auctionRoutes = require("./routes/auction");
 
 const app = express();
+const server = http.createServer(app);
 
 app.use(
   cors({
-    origin: "http://localhost:5173", 
-    credentials: true,               
+    origin: "http://localhost:5173",
+    credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -27,6 +32,9 @@ app.use("/api/auctions", auctionRoutes);
 
 connectDB();
 
-app.listen(process.env.PORT, () => {
+// 🔥 INIT SOCKET HERE
+initSocket(server);
+
+server.listen(process.env.PORT, () => {
   console.log("Server running on", process.env.PORT);
 });

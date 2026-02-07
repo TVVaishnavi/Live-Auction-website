@@ -8,7 +8,7 @@ function RegisteredAuctions({ auctions }) {
     const now = new Date();
     const start = new Date(startTime);
     const diffMinutes = (start - now) / (1000 * 60);
-    return diffMinutes <= 20 && diffMinutes > -10;
+    return diffMinutes <= 20 && diffMinutes > -30;
   };
 
   return (
@@ -19,41 +19,38 @@ function RegisteredAuctions({ auctions }) {
         <p className="empty">No registered auctions</p>
       )}
 
-      {auctions.map((reg) => {
-        const item = reg.auctionItemId || reg;
-
-        if (!item) return null;
-        if (item.status === "CLOSED" || item.status === "COMPLETED") return null;
-
-        const auctionKey = `${item.liveTitle}-${item.startTime}`;
-        const canJoin = canJoinAuction(item.startTime);
+      {auctions.map((auction) => {
+        const canJoin = canJoinAuction(auction.startTime);
 
         return (
-          <div key={reg.auctionKey} className="auction-card">
-            <h3>{item.liveTitle}</h3>
-            <p className="desc">{item.liveDescription}</p>
+          <div key={auction._id} className="auction-card">
+            <h3>{auction.title}</h3>
+            <p className="desc">{auction.description}</p>
 
             <p style={{ color: "green", fontWeight: 500, marginTop: "8px" }}>
-               You have been registered for this auction
-            </p> 
+              You have been registered for this auction
+            </p>
 
             <div className="meta">
-              <span>📅 {new Date(item.startTime).toDateString()}</span>
-              <span>⏰ {new Date(item.startTime).toLocaleTimeString()}</span>
+              <span>📅 {new Date(auction.startTime).toDateString()}</span>
+              <span>⏰ {new Date(auction.startTime).toLocaleTimeString()}</span>
             </div>
 
-            <div className="meet">
-              <p className="label">MEETING LINK</p>
-              <a href={item.meetLink} target="_blank" rel="noreferrer">
-                Join Google Meet
-              </a>
-            </div>
+            {auction.meetLink && (
+              <div className="meet">
+                <p className="label">MEETING LINK</p>
+                <a href={auction.meetLink} target="_blank" rel="noreferrer">
+                  Join Google Meet
+                </a>
+              </div>
+            )}
 
             {canJoin ? (
               <button
                 className="outline-btn"
-                onClick={() => navigate(`/bidlive/${encodeURIComponent(auctionKey)}`)}
-
+                onClick={() =>
+                  navigate(`/bidder/live/${auction._id}`)
+                }
               >
                 Join Auction
               </button>

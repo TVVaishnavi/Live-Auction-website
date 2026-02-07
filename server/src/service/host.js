@@ -1,5 +1,4 @@
 const AuctionItem = require("../models/auctionItem");
-const Bid = require("../models/bid");
 const Auction = require("../models/auction");
 
 exports.getAvailableItems = async () => {
