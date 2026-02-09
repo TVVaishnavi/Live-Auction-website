@@ -68,6 +68,7 @@ function SellerDashboard() {
                             <th>ITEM</th>
                             <th>STARTING PRICE</th>
                             <th>FINAL PRICE</th>
+                            <th>WINNER</th>
                             <th>STATUS</th>
                         </tr>
                     </thead>
@@ -96,6 +97,20 @@ function SellerDashboard() {
                                 </td>
                                 <td>₹{item.startingPrice}</td>
                                 <td>{item.finalPrice ? `₹${item.finalPrice}` : "-"}</td>
+
+                                <td>
+                                    {item.winnerName && item.winnerEmail ? (
+                                        <>
+                                            <strong>{item.winnerName}</strong>
+                                            <br />
+                                            <small className="muted">
+                                                {item.winnerEmail}
+                                            </small>
+                                        </>
+                                    ) : (
+                                        "-"
+                                    )}
+                                </td>
                                 <td>
                                     <span className={`status ${item.status.toLowerCase()}`}>
                                         {item.status}

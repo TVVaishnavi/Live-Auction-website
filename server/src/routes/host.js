@@ -51,6 +51,12 @@ router.get(
   hostController.myPreviousAuctions
 );
 
+router.post(
+  "/:itemId/finalize",
+  requireAuth,
+  requireRole("HOST"),
+  hostController.finalizeItem
+);
 
 
 module.exports = router;

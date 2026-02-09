@@ -1,4 +1,5 @@
 const bidderService = require("../service/bidder");
+const AuctionItem = require("../models/auctionItem");
 
 exports.register = async (req, res) => {
   try {
@@ -33,3 +34,20 @@ exports.myRegistrations = async (req, res) => {
   const data = await bidderService.myRegistrations(req.user.userId);
   res.json(data);
 };
+
+exports.myWins = async (req, res) => {
+  try {
+    const userEmail = req.user.email;
+
+    const items = await AuctionItem.find({
+      isFinalized: true,
+      winnerEmail: userEmail,
+    }).populate("auctionId", "title startTime");
+
+    res.json(items);
+  } catch (err) {
+    console.error("Failed to fetch bidder wins", err);
+    res.status(500).json({ message: "Failed to fetch wins" });
+  }
+};
+

@@ -1,6 +1,6 @@
 const { Server } = require("socket.io");
 const { getAuction } = require("./liveState");
-
+const Auction = require("../models/auction");
 let io;
 
 function initSocket(server) {
@@ -131,13 +131,28 @@ function initSocket(server) {
 
             io.to(`auction:${auctionId}`).emit("item-live", item);
         });
-        
-        
+
+        socket.on("auction-ended", async ({ auctionId }) => {
+            try {
+                // ✅ 1. Mark auction as ENDED in DB
+                await Auction.findByIdAndUpdate(auctionId, {
+                    status: "COMPLETED",
+                });
+
+                console.log("🏁 Auction marked as ENDED:", auctionId);
+
+                // ✅ 2. Notify everyone in the room
+                io.to(`auction:${auctionId}`).emit("auction-ended");
+            } catch (err) {
+                console.error("❌ Failed to end auction:", err);
+            }
+        });
+
         socket.on("disconnect", () => {
             console.log("Socket disconnected:", socket.id);
         });
 
-        
+
     });
 
     return io;

@@ -23,4 +23,12 @@ router.get(
   bidderController.myRegistrations
 );
 
+router.get(
+  "/my/wins",
+  requireAuth,
+  requireRole("BIDDER"),
+  bidderController.myWins
+);
+
+
 module.exports = router;

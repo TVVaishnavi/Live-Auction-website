@@ -1,5 +1,5 @@
 const AuctionItem = require("../models/auctionItem");
-const Auction = require("../models/auction");
+const Item = require("../models/auction");
 
 exports.getAvailableItems = async () => {
   return AuctionItem.find({ status: "AVAILABLE" })
@@ -75,4 +75,25 @@ exports.autoCompleteExpiredAuctions = async () => {
     },
     { status: "COMPLETED" }
   );
+};
+
+exports.finalizeItem = async ({
+  itemId,
+  winnerName,
+  winnerEmail,
+  finalPrice,
+}) => {
+  const item = await AuctionItem.findById(itemId);
+
+  if (!item) throw new Error("Item not found");
+  if (item.isFinalized) throw new Error("Item already finalized");
+
+  item.winnerName = winnerName;
+  item.winnerEmail = winnerEmail;
+  item.finalPrice = finalPrice;
+  item.status = "COMPLETED";
+  item.isFinalized = true;
+
+  await item.save();
+  return item;
 };

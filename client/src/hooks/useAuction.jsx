@@ -55,8 +55,9 @@ export function useAuction() {
   };
 
   const getMyWins = async () => {
-    return apiFetch("/auctions/my/wins");
+    return apiFetch("/items/my/wins");
   };
+
 
   const completeAuctionItem = async (auctionId, payload) => {
     return apiFetch(`/auctions/${auctionId}/complete-item`, "POST", payload);
@@ -66,6 +67,12 @@ export function useAuction() {
     return apiFetch(`/auctions/${auctionId}`);
   };
 
+  const getMyPreviousAuctions = () => {
+    return apiFetch("/items/my/previous");
+  }
+
+  const finalizeItem = (itemId, payload) =>
+    apiFetch(`/items/${itemId}/finalize`, "POST", payload);
 
   return {
     createAuctionItem,
@@ -79,11 +86,13 @@ export function useAuction() {
     getUpcomingAuctions,
     getHostUpcomingAuctions,
     startAuction,
+    getMyPreviousAuctions,
 
     registerForAuction,
     getMyRegistrations,
     getMyWins,
     completeAuctionItem,
     getAuctionById,
+    finalizeItem,
   };
 }

@@ -1,4 +1,5 @@
 const hostService = require("../service/host");
+const Auction = require("../models/auction");
 
 exports.availableItems = async (req, res) => {
   const items = await hostService.getAvailableItems();
@@ -49,26 +50,48 @@ exports.registrations = async (req, res) => {
 
 exports.myPreviousAuctions = async (req, res) => {
   try {
-    const auctions = await hostService.getPreviousAuctions(
-      req.user.userId
-    );
+    const auctions = await Auction.find({
+      hostId: req.user.userId,
+      status: "COMPLETED",
+    })
+      .populate({
+        path: "items",
+        populate: {
+          path: "sellerId",
+          select: "name email",
+        },
+      })
+      .sort({ updatedAt: -1 });
+
     res.json(auctions);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Failed to fetch previous auctions", err);
+    res.status(500).json({
+      message: "Failed to load previous auctions",
+    });
   }
 };
 
-exports.myPreviousAuctions = async (req, res) => {
+exports.finalizeItem = async (req, res) => {
   try {
-    await hostService.autoCompleteExpiredAuctions();
+    const { itemId } = req.params;
+    const { winnerName, winnerEmail, finalPrice } = req.body;
 
-    const auctions = await hostService.getPreviousAuctions(
-      req.user.userId
-    );
+    if (!winnerName || !winnerEmail || !finalPrice) {
+      return res.status(400).json({
+        message: "Winner name, winner email and final price are required",
+      });
+    }
 
-    res.json(auctions);
+    const item = await hostService.finalizeItem({
+      itemId,
+      winnerName,
+      winnerEmail,
+      finalPrice,
+    });
+
+    res.json(item);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-

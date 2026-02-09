@@ -40,12 +40,22 @@ const auctionItemSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: ["AVAILABLE", "CLAIMED", "ASSIGNED", "SOLD"],
+            enum: ["AVAILABLE", "CLAIMED", "ASSIGNED", "SOLD", "COMPLETED"],
             default: "AVAILABLE",
         },
 
+        winnerId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
 
         winnerName: {
+            type: String,
+            default: null,
+        },
+
+        winnerEmail: {
             type: String,
             default: null,
         },
@@ -53,6 +63,11 @@ const auctionItemSchema = new mongoose.Schema(
         finalPrice: {
             type: Number,
             default: null,
+        },
+
+        isFinalized: {
+            type: Boolean,
+            default: false,
         },
 
     },

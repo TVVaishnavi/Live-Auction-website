@@ -13,11 +13,22 @@ function BidderDashboard() {
     fetchData();
   }, []);
 
+  const now = new Date();
+
+  const visibleRegistrations = registrations.filter((auction) => {
+    if (!auction.startTime) return true; // fallback safety
+
+    const startTime = new Date(auction.startTime);
+    const hideAfter = new Date(startTime.getTime() + 60 * 60 * 1000); // +1 hour
+
+    return now < hideAfter;
+  });
+
   const fetchData = async () => {
     try {
       const regs = await getMyRegistrations();
       console.log("REGISTRATIONS FROM API:", regs);
-      setRegistrations(regs); 
+      setRegistrations(regs);
 
       try {
         const winsData = await getMyWins();
@@ -43,7 +54,11 @@ function BidderDashboard() {
       </p>
 
       <div className="bidder-stats">
-        <StatCard label="REGISTERED AUCTIONS" value={registrations.length} />
+        <StatCard
+          label="REGISTERED AUCTIONS"
+          value={visibleRegistrations.length}
+        />
+
         <StatCard label="ITEMS WON" value={wins.length} />
         <StatCard
           label="TOTAL SPENT"
@@ -51,7 +66,7 @@ function BidderDashboard() {
         />
       </div>
 
-      <RegisteredAuctions auctions={registrations} />
+      <RegisteredAuctions auctions={visibleRegistrations} />
     </div>
   );
 }

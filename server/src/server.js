@@ -32,7 +32,6 @@ app.use("/api/auctions", auctionRoutes);
 
 connectDB();
 
-// 🔥 INIT SOCKET HERE
 initSocket(server);
 
 server.listen(process.env.PORT, () => {
