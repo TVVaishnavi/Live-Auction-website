@@ -15,7 +15,7 @@ export default function BidderLiveAuction() {
   const [amount, setAmount] = useState("");
   const [countdown, setCountdown] = useState(null);
   const [winner, setWinner] = useState(null);
-
+  const [zoomImage, setZoomImage] = useState(null);
 
   const { getMe } = useAuth();
 
@@ -119,7 +119,11 @@ export default function BidderLiveAuction() {
     <div className="live-container">
       <header className="live-header">
         <h1>BIDDER LIVE</h1>
-        <span className="live-dot">● LIVE</span>
+        <div className="live-indicator">
+          <span className="live-dot"></span>
+          <span className="live-text">LIVE</span>
+        </div>
+
       </header>
 
       {!activeItem ? (
@@ -128,40 +132,56 @@ export default function BidderLiveAuction() {
           <p>The auction will start shortly</p>
         </div>
       ) : (
-        <div className="active-item">
-          <h2>{activeItem.title}</h2>
-          <p className="desc">{activeItem.description}</p>
-          <img src={activeItem.images?.[0]} alt={activeItem.title} />
-          <p className="price">
-            Starting Price: ₹{activeItem.startingPrice}
-          </p>
-
-          <div className="bid-box">
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              disabled={countdown !== null || winner}
+        <div className="active-item-card">
+          <div className="image-wrapper">
+            <img
+              src={activeItem.images?.[0]}
+              alt={activeItem.title}
+              className="item-image"
+              onClick={() => setZoomImage(activeItem.images?.[0])}
             />
-            <button
-              onClick={placeBid}
-              disabled={countdown !== null || winner}
-            >
-              Place Bid
-            </button>
+          </div>
+
+          {/* RIGHT DETAILS */}
+          <div className="item-details">
+            <h2 className="item-title">{activeItem.title}</h2>
+            <p className="desc">{activeItem.description}</p>
+            <p className="price">
+              Starting Price: ₹{activeItem.startingPrice}
+            </p>
           </div>
         </div>
+
       )}
 
-      {countdown !== null && <h1>{countdown}</h1>}
+      {countdown !== null && (
+        <div className="countdown">{countdown}</div>
+      )}
 
       {winner && (
-        <div className="winner">
-          <h2>🏆 Winner: {winner.userName}</h2>
+        <div className="winner-box">
+          <h3>🏆 Winner</h3>
+          <p><strong>{winner.userName}</strong></p>
           <p>{winner.userEmail}</p>
           <strong>₹{winner.amount}</strong>
         </div>
       )}
+
+      <div className="bid-box">
+        <input
+          type="number"
+          value={amount}
+          placeholder="Place your bid"
+          onChange={(e) => setAmount(e.target.value)}
+          disabled={countdown !== null || winner}
+        />
+        <button
+          onClick={placeBid}
+          disabled={countdown !== null || winner}
+        >
+          Place Bid
+        </button>
+      </div>
 
       <section className="bid-history">
         <h3>Live Bids</h3>
@@ -177,6 +197,14 @@ export default function BidderLiveAuction() {
           ))
         )}
       </section>
+      
+      {zoomImage && (
+        <div className="image-overlay" onClick={() => setZoomImage(null)}>
+          <img src={zoomImage} alt="Zoomed item" />
+          <span className="close-hint">Click anywhere to close</span>
+        </div>
+      )}
+
     </div>
   );
 }

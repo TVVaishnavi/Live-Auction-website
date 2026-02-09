@@ -1,6 +1,10 @@
 const { Server } = require("socket.io");
 const { getAuction } = require("./liveState");
 const Auction = require("../models/auction");
+const bidQueues = new Map();
+const processingItems = new Set();
+const highestBidMap = new Map();
+
 let io;
 
 function initSocket(server) {
@@ -54,35 +58,82 @@ function initSocket(server) {
         });
 
         // ================= PLACE BID =================
-        socket.on("place-bid", ({ auctionId, itemId, amount, userId, userName, userEmail }) => {
-            const auction = getAuction(auctionId);
+        socket.on(
+            "place-bid",
+            ({ auctionId, itemId, amount, userId, userName, userEmail }) => {
+                const auction = getAuction(auctionId);
 
-            if (auction.status !== "BIDDING") return;
-            if (!auction.currentItem) return;
-            if (auction.currentItem._id !== itemId) return;
+                if (auction.status !== "BIDDING") return;
+                if (!auction.currentItem) return;
+                if (auction.currentItem._id !== itemId) return;
 
-            if (auction.highestBid && amount <= auction.highestBid.amount) {
-                socket.emit("bid-rejected", {
-                    message: "Bid must be higher than current bid",
+                // Create queue if missing
+                if (!bidQueues.has(itemId)) {
+                    bidQueues.set(itemId, []);
+                }
+
+                // Push bid into queue
+                bidQueues.get(itemId).push({
+                    auctionId,
+                    itemId,
+                    amount,
+                    userId,
+                    userName,
+                    userEmail,
+                    socketId: socket.id, // 👈 important for rejection
+                    time: Date.now(),
                 });
-                return;
+
+                // Start processor
+                processBidQueue(itemId);
+            }
+        );
+
+        async function processBidQueue(itemId) {
+            if (processingItems.has(itemId)) return;
+
+            processingItems.add(itemId);
+
+            const queue = bidQueues.get(itemId);
+
+            while (queue && queue.length > 0) {
+                const bid = queue.shift();
+
+                const auction = getAuction(bid.auctionId);
+
+                if (!auction || auction.status !== "BIDDING") continue;
+                if (!auction.currentItem) continue;
+
+                const currentHighest = auction.highestBid?.amount || 0;
+
+                // ❌ Reject invalid bids
+                if (bid.amount <= currentHighest) {
+                    io.to(bid.socketId).emit("bid-rejected", {
+                        message: "Bid must be higher than current bid",
+                    });
+                    continue;
+                }
+
+                // ✅ Accept bid
+                const acceptedBid = {
+                    amount: bid.amount,
+                    userId: bid.userId,
+                    userName: bid.userName,
+                    userEmail: bid.userEmail,
+                    time: bid.time,
+                };
+
+                auction.highestBid = acceptedBid;
+                auction.bids.push(acceptedBid);
+
+                io.to(`auction:${bid.auctionId}`).emit("bid-updated", acceptedBid);
+
+                console.log("NEW BID (QUEUED):", acceptedBid);
             }
 
-            const bid = {
-                amount,
-                userId,
-                userName,
-                userEmail,
-                time: Date.now(),
-            };
+            processingItems.delete(itemId);
+        }
 
-            auction.highestBid = bid;
-            auction.bids.push(bid);
-
-            io.to(`auction:${auctionId}`).emit("bid-updated", bid);
-
-            console.log("NEW BID:", bid);
-        });
 
         // ================= START COUNTDOWN =================
         socket.on("host:start-countdown", ({ auctionId }) => {

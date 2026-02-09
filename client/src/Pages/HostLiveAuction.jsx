@@ -17,6 +17,7 @@ export default function HostLiveAuction() {
   const [bids, setBids] = useState([]);
   const [highestBid, setHighestBid] = useState(null);
   const [completedItemIds, setCompletedItemIds] = useState([]);
+  const [itemEnded, setItemEnded] = useState(false);
 
   useEffect(() => {
     const onAuctionEnded = () => {
@@ -44,28 +45,29 @@ export default function HostLiveAuction() {
 
       const soldItemId = activeItem._id;
 
+      // ✅ winner visible
       setWinner(data.winner);
 
-      // persist backend
+      // ✅ mark item SOLD immediately
+      setCompletedItemIds((prev) => [...prev, soldItemId]);
+
       await completeAuctionItem(soldItemId, {
         winner: data.winner,
         bids: data.bids,
       });
 
-      // ⏱️ delay for UX (winner visibility)
+      // ⏱️ UX delay ONLY for clearing UI
       setTimeout(() => {
-        setCompletedItemIds((prev) => [...prev, soldItemId]);
         setActiveItem(null);
         setHighestBid(null);
         setBids([]);
         setCountdown(null);
+        setWinner(null);
 
-        // 🔥 CHECK IF THIS WAS THE LAST ITEM
-        const soldCount = completedItemIds.length + 1;
-        if (soldCount === items.length) {
+        if (completedItemIds.length + 1 === items.length) {
           socket.emit("auction-ended", { auctionId });
         }
-      }, 60_000); // 1 minute
+      }, 60_000);
     };
 
     socket.on("winner-declared", onWinnerDeclared);
@@ -129,95 +131,107 @@ export default function HostLiveAuction() {
 
   return (
     <div className="live-container">
-      <h1>HOST LIVE</h1>
+      <h1 className="page-title">Host Live Auction</h1>
+      <div className="live-indicator">
+        <span className="live-dot"></span>
+        <span className="live-text">LIVE</span>
+      </div>
 
-      {activeItem ? (
-        <div className="active-item">
-          <h2>{activeItem.title}</h2>
 
-          <p className="desc">{activeItem.description}</p>
+      {/* ===== TOP : ACTIVE ITEM ===== */}
+      <div className="top-section">
+        {activeItem ? (
+          <div className="active-item-card">
+            <img
+              src={activeItem.images?.[0]}
+              alt={activeItem.title}
+              className="item-image"
+            />
 
-          <img src={activeItem.images?.[0]} alt={activeItem.title} />
+            <div className="item-details">
+              <h2>{activeItem.title}</h2>
+              <p className="desc">{activeItem.description}</p>
+              <p className="price">
+                Starting Price: ₹{activeItem.startingPrice}
+              </p>
 
-          <p className="price">Starting Price: ₹{activeItem.startingPrice}</p>
-        </div>
-      ) : (
-        <p>Select an item</p>
-      )}
-
-      <button
-        onClick={() => socket.emit("host:start-countdown", { auctionId })}
-      >
-        Start Countdown
-      </button>
-
-      {countdown !== null && <h1>{countdown}</h1>}
-
-      {winner && (
-        <h2>
-          Winner: {winner.userName} ({winner.userEmail}) – ₹{winner.amount}
-        </h2>
-      )}
-
-      <h3>Items</h3>
-      <h3>Items</h3>
-      {items.map((item) => {
-        const isSold = completedItemIds.includes(item._id);
-
-        return (
-          <div
-            key={item._id}
-            onClick={() => {
-              if (!isSold) startItem(item);
-            }}
-            style={{
-              cursor: isSold ? "not-allowed" : "pointer",
-              opacity: isSold ? 0.45 : 1,
-              textDecoration: isSold ? "line-through" : "none",
-              pointerEvents: isSold ? "none" : "auto",
-              padding: "6px 0",
-              color: isSold ? "#888" : "#fff",
-              fontStyle: isSold ? "italic" : "normal",
-            }}
-          >
-            {item.title}
-            {isSold && (
-              <span
-                style={{ marginLeft: 8, color: "#ff6b6b", fontWeight: 600 }}
+              <button
+                className="countdown-btn"
+                disabled={itemEnded}
+                onClick={() =>
+                  socket.emit("host:start-countdown", { auctionId })
+                }
               >
-                (SOLD)
-              </span>
-            )}
-          </div>
-        );
-      })}
+                Start Countdown
+              </button>
 
-      {highestBid && (
-        <div className="highest-bid">
-          <h3>Current Highest Bid</h3>
-          <p>
-            ₹{highestBid.amount}
-            <br />
-            {highestBid.userName} ({highestBid.userEmail})
-          </p>
-        </div>
-      )}
+              {countdown !== null && (
+                <div className="countdown">{countdown}</div>
+              )}
 
-      <h3>Live Bids</h3>
-
-      {bids.length === 0 ? (
-        <p>No bids yet</p>
-      ) : (
-        <div className="bid-list">
-          {bids.map((bid, index) => (
-            <div key={index} className="bid-row">
-              <span>{bid.userName}</span>
-              <span>{bid.userEmail}</span>
-              <strong>₹{bid.amount}</strong>
+              {winner && (
+                <div className="winner-box">
+                  Winner: <strong>{winner.userName}</strong> (
+                  {winner.userEmail}) – ₹{winner.amount}
+                </div>
+              )}
             </div>
-          ))}
+          </div>
+        ) : (
+          <div className="empty-state">Select an item to start bidding</div>
+        )}
+      </div>
+
+      {/* ===== BOTTOM : SPLIT ===== */}
+      <div className="bottom-section">
+        {/* LEFT : ITEMS */}
+        <div className="items-panel">
+          <h3>Items</h3>
+          {items.map((item) => {
+            const isSold = completedItemIds.includes(item._id);
+
+            return (
+              <div
+                key={item._id}
+                className={`item-row ${isSold ? "sold" : ""}`}
+                onClick={() => !isSold && startItem(item)}
+              >
+                {item.title}
+                {isSold && <span className="sold-tag">SOLD</span>}
+              </div>
+            );
+          })}
         </div>
-      )}
+
+        {/* RIGHT : LIVE BIDS */}
+        <div className="bids-panel">
+          <h3>Live Bids</h3>
+
+          {highestBid && (
+            <div className="highest-bid">
+              <p>Highest Bid</p>
+              <strong>₹{highestBid.amount}</strong>
+              <span>
+                {highestBid.userName} ({highestBid.userEmail})
+              </span>
+            </div>
+          )}
+
+          {bids.length === 0 ? (
+            <p className="muted">No bids yet</p>
+          ) : (
+            <div className="bid-list">
+              {bids.map((bid, index) => (
+                <div key={index} className="bid-row">
+                  <span>{bid.userName}</span>
+                  <small>{bid.userEmail}</small>
+                  <strong>₹{bid.amount}</strong>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
