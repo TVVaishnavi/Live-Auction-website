@@ -45,10 +45,8 @@ export default function HostLiveAuction() {
 
       const soldItemId = activeItem._id;
 
-      // ✅ winner visible
       setWinner(data.winner);
 
-      // ✅ mark item SOLD immediately
       setCompletedItemIds((prev) => [...prev, soldItemId]);
 
       await completeAuctionItem(soldItemId, {
@@ -56,7 +54,6 @@ export default function HostLiveAuction() {
         bids: data.bids,
       });
 
-      // ⏱️ UX delay ONLY for clearing UI
       setTimeout(() => {
         setActiveItem(null);
         setHighestBid(null);
@@ -137,8 +134,6 @@ export default function HostLiveAuction() {
         <span className="live-text">LIVE</span>
       </div>
 
-
-      {/* ===== TOP : ACTIVE ITEM ===== */}
       <div className="top-section">
         {activeItem ? (
           <div className="active-item-card">
@@ -182,9 +177,7 @@ export default function HostLiveAuction() {
         )}
       </div>
 
-      {/* ===== BOTTOM : SPLIT ===== */}
       <div className="bottom-section">
-        {/* LEFT : ITEMS */}
         <div className="items-panel">
           <h3>Items</h3>
           {items.map((item) => {
@@ -203,7 +196,6 @@ export default function HostLiveAuction() {
           })}
         </div>
 
-        {/* RIGHT : LIVE BIDS */}
         <div className="bids-panel">
           <h3>Live Bids</h3>
 

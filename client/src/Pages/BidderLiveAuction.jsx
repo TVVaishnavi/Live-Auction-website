@@ -6,10 +6,8 @@ import { useNavigate } from "react-router-dom";
 import "../styles/BidderLiveAuction.css";
 
 export default function BidderLiveAuction() {
-  console.log("🔥 BIDDER LIVE COMPONENT MOUNTED 🔥");
 
   const { auctionId } = useParams();
-  console.log("🧪 auctionId:", auctionId);
   const [activeItem, setActiveItem] = useState(null);
   const [bids, setBids] = useState([]);
   const [amount, setAmount] = useState("");
@@ -44,7 +42,6 @@ export default function BidderLiveAuction() {
     if (!auctionId) return;
 
     const onItemLive = (item) => {
-      console.log("📦 ITEM RECEIVED:", item);
       setActiveItem(item);
       setBids([]);
       setWinner(null);
@@ -64,13 +61,11 @@ export default function BidderLiveAuction() {
       setCountdown(null);
     };
 
-    // ✅ 1. REGISTER LISTENERS FIRST
     socket.on("item-live", onItemLive);
     socket.on("bid-updated", onBidUpdated);
     socket.on("countdown", onCountdown);
     socket.on("winner-declared", onWinner);
 
-    // ✅ 2. THEN CONNECT + JOIN
     const joinAuction = () => {
       console.log("🟢 BIDDER joining auction:", auctionId);
 
@@ -142,7 +137,6 @@ export default function BidderLiveAuction() {
             />
           </div>
 
-          {/* RIGHT DETAILS */}
           <div className="item-details">
             <h2 className="item-title">{activeItem.title}</h2>
             <p className="desc">{activeItem.description}</p>
@@ -197,7 +191,7 @@ export default function BidderLiveAuction() {
           ))
         )}
       </section>
-      
+
       {zoomImage && (
         <div className="image-overlay" onClick={() => setZoomImage(null)}>
           <img src={zoomImage} alt="Zoomed item" />

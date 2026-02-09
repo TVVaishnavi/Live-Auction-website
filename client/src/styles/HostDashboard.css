@@ -25,9 +25,9 @@
 }
 
 .item-card {
-  background: #1f2937; /* dark slate */
+  background: #1f2937; 
   border: 1px solid #374151;
-  color: #f9fafb; /* base text color */
+  color: #f9fafb;
 }
 
 .item-card h3 {

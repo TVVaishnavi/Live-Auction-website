@@ -16,10 +16,10 @@ function BidderDashboard() {
   const now = new Date();
 
   const visibleRegistrations = registrations.filter((auction) => {
-    if (!auction.startTime) return true; // fallback safety
+    if (!auction.startTime) return true; 
 
     const startTime = new Date(auction.startTime);
-    const hideAfter = new Date(startTime.getTime() + 60 * 60 * 1000); // +1 hour
+    const hideAfter = new Date(startTime.getTime() + 60 * 60 * 1000); 
 
     return now < hideAfter;
   });

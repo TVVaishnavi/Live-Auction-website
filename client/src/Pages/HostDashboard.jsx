@@ -3,7 +3,6 @@ import AvailableAuctionItems from "../components/AvailableAuctionItems";
 import MyAuctionList from "../components/MyAuctionList";
 import { useAuction } from "../hooks/useAuction";
 import { useNavigate } from "react-router-dom";
-import HostAuctionSummary from '../components/HostAuctionSummary';
 import "../styles/HostDashboard.css";
 
 export default function HostDashboard() {
@@ -28,7 +27,7 @@ export default function HostDashboard() {
     const fetchPrevious = async () => {
       try {
         const data = await getMyPreviousAuctions();
-        setPreviousAuctions(data); // ⚠️ data is ARRAY
+        setPreviousAuctions(data); 
       } catch (err) {
         console.error("Failed to load previous auctions", err);
       }
@@ -37,12 +36,6 @@ export default function HostDashboard() {
     fetchPrevious();
   }, []);
 
-
-  const toggleAuction = (auctionId) => {
-    setExpandedAuctionId((prev) =>
-      prev === auctionId ? null : auctionId
-    );
-  };
 
   const fetchPreviousAuctions = async () => {
     try {
@@ -81,7 +74,6 @@ export default function HostDashboard() {
         <p>Manage auction items and schedule events</p>
       </header>
 
-      {/* seller related */}
       <AvailableAuctionItems />
       <MyAuctionList />
 
@@ -108,10 +100,7 @@ export default function HostDashboard() {
               <button
                 disabled={!canStart}
                 onClick={async () => {
-                  // mark auction as LIVE in backend
                   await startAuction(auction._id);
-
-                  // 🔥 go to REAL live auction page
                   navigate(`/host/live/${auction._id}`);
 
                 }}
@@ -132,8 +121,6 @@ export default function HostDashboard() {
       ) : (
         previousAuctions.map((auction) => (
           <div key={auction._id} className="host-card">
-
-            {/* 🔽 clickable header */}
             <div
               style={{ cursor: "pointer" }}
               onClick={() =>
@@ -146,7 +133,6 @@ export default function HostDashboard() {
               <p>Status: {auction.status}</p>
             </div>
 
-            {/* 🔽 dropdown table */}
             {openAuctionId === auction._id && (
               <table>
                 <thead>

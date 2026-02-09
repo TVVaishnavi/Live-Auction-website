@@ -38,7 +38,6 @@ function initSocket(server) {
                 const auction = getAuction(auctionId);
                 console.log("📦 live auction state:", auction);
 
-                // 🔥 RE-SYNC CURRENT ITEM
                 if (auction.currentItem) {
                     console.log("🔁 Re-syncing item for", role);
                     socket.emit("item-live", auction.currentItem);
@@ -46,7 +45,6 @@ function initSocket(server) {
                     console.log("⚠️ No currentItem to sync");
                 }
 
-                // 🔥 RE-SYNC HIGHEST BID
                 if (auction.highestBid) {
                     console.log("🔁 Re-syncing highest bid for", role);
                     socket.emit("bid-updated", auction.highestBid);
@@ -57,7 +55,6 @@ function initSocket(server) {
             }
         });
 
-        // ================= PLACE BID =================
         socket.on(
             "place-bid",
             ({ auctionId, itemId, amount, userId, userName, userEmail }) => {
@@ -67,12 +64,10 @@ function initSocket(server) {
                 if (!auction.currentItem) return;
                 if (auction.currentItem._id !== itemId) return;
 
-                // Create queue if missing
                 if (!bidQueues.has(itemId)) {
                     bidQueues.set(itemId, []);
                 }
 
-                // Push bid into queue
                 bidQueues.get(itemId).push({
                     auctionId,
                     itemId,
@@ -80,11 +75,10 @@ function initSocket(server) {
                     userId,
                     userName,
                     userEmail,
-                    socketId: socket.id, // 👈 important for rejection
+                    socketId: socket.id, 
                     time: Date.now(),
                 });
 
-                // Start processor
                 processBidQueue(itemId);
             }
         );
@@ -106,7 +100,6 @@ function initSocket(server) {
 
                 const currentHighest = auction.highestBid?.amount || 0;
 
-                // ❌ Reject invalid bids
                 if (bid.amount <= currentHighest) {
                     io.to(bid.socketId).emit("bid-rejected", {
                         message: "Bid must be higher than current bid",
@@ -114,7 +107,6 @@ function initSocket(server) {
                     continue;
                 }
 
-                // ✅ Accept bid
                 const acceptedBid = {
                     amount: bid.amount,
                     userId: bid.userId,
@@ -134,8 +126,6 @@ function initSocket(server) {
             processingItems.delete(itemId);
         }
 
-
-        // ================= START COUNTDOWN =================
         socket.on("host:start-countdown", ({ auctionId }) => {
             const auction = getAuction(auctionId);
 
@@ -185,14 +175,10 @@ function initSocket(server) {
 
         socket.on("auction-ended", async ({ auctionId }) => {
             try {
-                // ✅ 1. Mark auction as ENDED in DB
                 await Auction.findByIdAndUpdate(auctionId, {
                     status: "COMPLETED",
                 });
 
-                console.log("🏁 Auction marked as ENDED:", auctionId);
-
-                // ✅ 2. Notify everyone in the room
                 io.to(`auction:${auctionId}`).emit("auction-ended");
             } catch (err) {
                 console.error("❌ Failed to end auction:", err);
