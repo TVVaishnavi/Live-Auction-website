@@ -4,6 +4,7 @@ const Auction = require("../models/auction");
 const bidQueues = new Map();
 const processingItems = new Set();
 const highestBidMap = new Map();
+const countdownTimers = new Map();
 
 let io;
 
@@ -20,7 +21,7 @@ function initSocket(server) {
 
         socket.on("join-auction", ({ auctionId, role, userId }) => {
             try {
-                console.log("➡️ join-auction RECEIVED", {
+                console.log("join-auction RECEIVED", {
                     socketId: socket.id,
                     auctionId,
                     role,
@@ -28,30 +29,30 @@ function initSocket(server) {
                 });
 
                 if (!auctionId) {
-                    console.error("❌ auctionId missing");
+                    console.error("auctionId missing");
                     return;
                 }
 
                 socket.join(`auction:${auctionId}`);
-                console.log(`✅ ${role} joined room auction:${auctionId}`);
+                console.log(`${role} joined room auction:${auctionId}`);
 
                 const auction = getAuction(auctionId);
-                console.log("📦 live auction state:", auction);
+                console.log("live auction state:", auction);
 
                 if (auction.currentItem) {
-                    console.log("🔁 Re-syncing item for", role);
+                    console.log("Re-syncing item for", role);
                     socket.emit("item-live", auction.currentItem);
                 } else {
-                    console.log("⚠️ No currentItem to sync");
+                    console.log("No currentItem to sync");
                 }
 
                 if (auction.highestBid) {
-                    console.log("🔁 Re-syncing highest bid for", role);
+                    console.log("Re-syncing highest bid for", role);
                     socket.emit("bid-updated", auction.highestBid);
                 }
 
             } catch (err) {
-                console.error("🔥 ERROR in join-auction", err);
+                console.error("ERROR in join-auction", err);
             }
         });
 
@@ -60,7 +61,7 @@ function initSocket(server) {
             ({ auctionId, itemId, amount, userId, userName, userEmail }) => {
                 const auction = getAuction(auctionId);
 
-                if (auction.status !== "BIDDING") return;
+               if (!["BIDDING", "COUNTDOWN"].includes(auction.status)) return;
                 if (!auction.currentItem) return;
                 if (auction.currentItem._id !== itemId) return;
 
@@ -69,13 +70,13 @@ function initSocket(server) {
                 }
 
                 bidQueues.get(itemId).push({
-                    auctionId,
+                    auctionId, 
                     itemId,
                     amount,
-                    userId,
+                    userId,  
                     userName,
                     userEmail,
-                    socketId: socket.id, 
+                    socketId: socket.id,
                     time: Date.now(),
                 });
 
@@ -95,8 +96,20 @@ function initSocket(server) {
 
                 const auction = getAuction(bid.auctionId);
 
-                if (!auction || auction.status !== "BIDDING") continue;
+                if (!auction || !["BIDDING", "COUNTDOWN"].includes(auction.status)) continue;
                 if (!auction.currentItem) continue;
+
+                if (auction.status === "COUNTDOWN") {
+                    const timer = countdownTimers.get(bid.auctionId);
+                    if (timer) {
+                        clearInterval(timer);
+                        countdownTimers.delete(bid.auctionId);
+                    }
+
+                    auction.status = "BIDDING";
+
+                    io.to(`auction:${bid.auctionId}`).emit("countdown-cancelled");
+                }
 
                 const currentHighest = auction.highestBid?.amount || 0;
 
@@ -128,35 +141,34 @@ function initSocket(server) {
 
         socket.on("host:start-countdown", ({ auctionId }) => {
             const auction = getAuction(auctionId);
-
-            if (auction.status !== "BIDDING") return;
+            if (auction.status === "ENDED") return;
 
             auction.status = "COUNTDOWN";
-
             let count = 3;
 
             const interval = setInterval(() => {
                 io.to(`auction:${auctionId}`).emit("countdown", count);
                 count--;
 
-                if (count < 0) {
+                if (count <= 0) {
                     clearInterval(interval);
+                    countdownTimers.delete(auctionId);
 
-                    auction.status = "ENDED";
+                    auction.status = "COMPLETED";
 
                     io.to(`auction:${auctionId}`).emit("winner-declared", {
                         winner: auction.highestBid,
                         bids: auction.bids,
                         item: auction.currentItem,
                     });
-
-                    console.log("WINNER:", auction.highestBid);
                 }
             }, 1000);
+
+            countdownTimers.set(auctionId, interval);
         });
 
         socket.on("host:set-item", ({ auctionId, item }) => {
-            console.log("📡 SERVER RECEIVED host:set-item", {
+            console.log(" SERVER RECEIVED host:set-item", {
                 auctionId,
                 itemId: item?._id,
             });
@@ -168,7 +180,7 @@ function initSocket(server) {
             auction.bids = [];
             auction.status = "BIDDING";
 
-            console.log("📢 SERVER EMITTING item-live to room", `auction:${auctionId}`);
+            console.log(" SERVER EMITTING item-live to room", `auction:${auctionId}`);
 
             io.to(`auction:${auctionId}`).emit("item-live", item);
         });
@@ -181,7 +193,7 @@ function initSocket(server) {
 
                 io.to(`auction:${auctionId}`).emit("auction-ended");
             } catch (err) {
-                console.error("❌ Failed to end auction:", err);
+                console.error("Failed to end auction:", err);
             }
         });
 

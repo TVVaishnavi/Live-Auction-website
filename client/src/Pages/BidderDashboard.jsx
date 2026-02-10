@@ -15,14 +15,10 @@ function BidderDashboard() {
 
   const now = new Date();
 
-  const visibleRegistrations = registrations.filter((auction) => {
-    if (!auction.startTime) return true; 
+  const visibleRegistrations = registrations.filter(
+    (auction) => auction.status !== "COMPLETED"
+  );
 
-    const startTime = new Date(auction.startTime);
-    const hideAfter = new Date(startTime.getTime() + 60 * 60 * 1000); 
-
-    return now < hideAfter;
-  });
 
   const fetchData = async () => {
     try {

@@ -224,6 +224,12 @@ export default function HostLiveAuction() {
           )}
         </div>
       </div>
+      <button
+        className="end-auction-btn"
+        onClick={() => socket.emit("auction-ended", { auctionId })}
+      >
+        End Auction
+      </button>
     </div>
   );
 }

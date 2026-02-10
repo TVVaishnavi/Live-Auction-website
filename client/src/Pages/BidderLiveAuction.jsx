@@ -61,14 +61,18 @@ export default function BidderLiveAuction() {
       setCountdown(null);
     };
 
+    const onCountdownCancelled = () => {
+      setCountdown(null);
+    };
+
+    socket.on("countdown-cancelled", onCountdownCancelled);
+
     socket.on("item-live", onItemLive);
     socket.on("bid-updated", onBidUpdated);
     socket.on("countdown", onCountdown);
     socket.on("winner-declared", onWinner);
 
     const joinAuction = () => {
-      console.log("🟢 BIDDER joining auction:", auctionId);
-
       socket.emit("join-auction", {
         auctionId,
         role: "BIDDER",
@@ -167,11 +171,11 @@ export default function BidderLiveAuction() {
           value={amount}
           placeholder="Place your bid"
           onChange={(e) => setAmount(e.target.value)}
-          disabled={countdown !== null || winner}
+          disabled={winner !== null}
         />
         <button
           onClick={placeBid}
-          disabled={countdown !== null || winner}
+          disabled={winner !== null}
         >
           Place Bid
         </button>
