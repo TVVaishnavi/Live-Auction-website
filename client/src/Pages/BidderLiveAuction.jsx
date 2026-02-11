@@ -97,10 +97,8 @@ export default function BidderLiveAuction() {
   }, [auctionId]);
 
 
-
-
   const placeBid = () => {
-    if (!amount || !activeItem || countdown !== null || winner) return;
+    if (!amount || !activeItem || winner) return;
 
     socket.emit("place-bid", {
       auctionId,

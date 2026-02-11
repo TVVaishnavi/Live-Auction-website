@@ -40,7 +40,7 @@ exports.myWins = async (req, res) => {
     const userEmail = req.user.email;
 
     const items = await AuctionItem.find({
-      isFinalized: true,
+      status: "COMPLETED",
       winnerEmail: userEmail,
     }).populate("auctionId", "title startTime");
 

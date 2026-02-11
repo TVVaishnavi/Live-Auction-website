@@ -77,7 +77,7 @@ function SellerDashboard() {
                         {items.map(item => (
                             <tr key={item._id}>
                                 <td className="item-cell">
-                                    <div className="item-image">
+                                    <div className="item-images">
                                         <img
                                             src={
                                                 item.images && item.images.length > 0

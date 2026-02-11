@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuction } from "../hooks/useAuction";
+import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import '../styles/home.css';
 
@@ -8,6 +9,8 @@ function Home() {
     const [auctions, setAuctions] = useState([]);
     const [selectedAuction, setSelectedAuction] = useState(null);
     const [isRegistered, setIsRegistered] = useState(false);
+    const [user, setUser] = useState(null);
+    const { getMe } = useAuth();
 
     const navigate = useNavigate();
 
@@ -94,7 +97,15 @@ function Home() {
                         <p className="page-subtitle">{selectedAuction.description}</p>
 
                         {!isRegistered ? (
-                            <button onClick={handleRegister}>Register</button>
+                            <button
+                                onClick={handleRegister}
+                                disabled={user?.role !== "BIDDER"}
+                            >
+                                {user?.role === "BIDDER"
+                                    ? "Register"
+                                    : "Only bidders can register"}
+                            </button>
+
                         ) : (
                             <>
                                 <p>✅ You are registered</p>

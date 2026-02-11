@@ -11,11 +11,8 @@ export default function HostDashboard() {
 
   const [upcoming, setUpcoming] = useState([]);
   const [previous, setPrevious] = useState([]);
-  const [expandedAuctionId, setExpandedAuctionId] = useState(null);
   const [previousAuctions, setPreviousAuctions] = useState([]);
   const [openAuctionId, setOpenAuctionId] = useState(null);
-  const [drafts, setDrafts] = useState({});
-  const [saving, setSaving] = useState(false);
 
 
   useEffect(() => {
@@ -27,7 +24,7 @@ export default function HostDashboard() {
     const fetchPrevious = async () => {
       try {
         const data = await getMyPreviousAuctions();
-        setPreviousAuctions(data); 
+        setPreviousAuctions(data);
       } catch (err) {
         console.error("Failed to load previous auctions", err);
       }
@@ -121,6 +118,7 @@ export default function HostDashboard() {
       ) : (
         previousAuctions.map((auction) => (
           <div key={auction._id} className="host-card">
+
             <div
               style={{ cursor: "pointer" }}
               onClick={() =>
@@ -133,6 +131,7 @@ export default function HostDashboard() {
               <p>Status: {auction.status}</p>
             </div>
 
+            {/* Expand Table */}
             {openAuctionId === auction._id && (
               <table>
                 <thead>
@@ -147,109 +146,37 @@ export default function HostDashboard() {
                   {auction.items.map((item) => (
                     <tr key={item._id}>
                       <td>{item.title}</td>
+
                       <td>
                         {item.sellerId?.name}
                         <br />
                         <small>{item.sellerId?.email}</small>
                       </td>
-                      <td>
-                        {item.isFinalized ? (
-                          item.winnerName
-                        ) : (
-                          <input
-                            type="text"
-                            placeholder="Winner name"
-                            value={drafts[item._id]?.winnerName || ""}
-                            onChange={(e) =>
-                              setDrafts((prev) => ({
-                                ...prev,
-                                [item._id]: {
-                                  ...prev[item._id],
-                                  winnerName: e.target.value,
-                                },
-                              }))
-                            }
-                          />
-
-                        )}
-                      </td>
 
                       <td>
-                        {item.isFinalized ? (
+                        {item.winnerName ? (
                           <>
-                            {item.winnerEmail}
+                            <strong>{item.winnerName}</strong>
+                            <br />
+                            <small>{item.winnerEmail}</small>
                           </>
                         ) : (
-                          <input
-                            type="email"
-                            placeholder="Winner email"
-                            value={drafts[item._id]?.winnerEmail || ""}
-                            onChange={(e) =>
-                              setDrafts((prev) => ({
-                                ...prev,
-                                [item._id]: {
-                                  ...prev[item._id],
-                                  winnerEmail: e.target.value,
-                                },
-                              }))
-                            }
-                          />
+                          "-"
                         )}
                       </td>
 
                       <td>
-                        {item.isFinalized ? (
-                          `₹${item.finalPrice}`
-                        ) : (
-                          <input
-                            type="number"
-                            placeholder="Final price"
-                            value={drafts[item._id]?.finalPrice || ""}
-                            onChange={(e) =>
-                              setDrafts((prev) => ({
-                                ...prev,
-                                [item._id]: {
-                                  ...prev[item._id],
-                                  finalPrice: e.target.value,
-                                },
-                              }))
-                            }
-                          />
-                        )}
+                        {item.finalPrice ? `₹${item.finalPrice}` : "-"}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             )}
-
-            {auction.items.some((i) => !i.isFinalized) && (
-              <button
-                disabled={saving}
-                onClick={async () => {
-                  setSaving(true);
-
-                  for (const itemId in drafts) {
-                    const { winnerName, finalPrice, winnerEmail } = drafts[itemId];
-                    if (!winnerName || !finalPrice || !winnerEmail) continue;
-
-                    await finalizeItem(itemId, {
-                      winnerName,
-                      winnerEmail,
-                      finalPrice,
-                    });
-                  }
-
-                  window.location.reload();
-                }}
-              >
-                Save
-              </button>
-            )}
-
           </div>
         ))
       )}
+
     </div>
   );
 }

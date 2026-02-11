@@ -47,12 +47,8 @@ export default function HostLiveAuction() {
 
       setWinner(data.winner);
 
-      setCompletedItemIds((prev) => [...prev, soldItemId]);
-
-      await completeAuctionItem(soldItemId, {
-        winner: data.winner,
-        bids: data.bids,
-      });
+      const refreshed = await getAuctionById(auctionId);
+      setItems(refreshed.items || refreshed.auctionItems || []);
 
       setTimeout(() => {
         setActiveItem(null);
@@ -60,16 +56,13 @@ export default function HostLiveAuction() {
         setBids([]);
         setCountdown(null);
         setWinner(null);
-
-        if (completedItemIds.length + 1 === items.length) {
-          socket.emit("auction-ended", { auctionId });
-        }
-      }, 60_000);
+      }, 3000); // shorter delay for testing
     };
 
     socket.on("winner-declared", onWinnerDeclared);
     return () => socket.off("winner-declared", onWinnerDeclared);
-  }, [activeItem, completedItemIds, items]);
+  }, [activeItem]);
+
 
   useEffect(() => {
     socket.emit("join-auction", {
@@ -89,13 +82,20 @@ export default function HostLiveAuction() {
     const loadAuction = async () => {
       const data = await getAuctionById(auctionId);
 
-      console.log("Auction items response:", data);
+      const auctionItems = data.items || data.auctionItems || [];
 
-      setItems(data.items || data.auctionItems || []);
+      setItems(auctionItems);
+
+      const soldItems = auctionItems
+        .filter(item => item.status === "COMPLETED" || item.isFinalized)
+        .map(item => item._id);
+
+      setCompletedItemIds(soldItems);
     };
 
     loadAuction();
   }, [auctionId]);
+
 
   useEffect(() => {
     socket.on("host:next-item", () => {
@@ -181,8 +181,7 @@ export default function HostLiveAuction() {
         <div className="items-panel">
           <h3>Items</h3>
           {items.map((item) => {
-            const isSold = completedItemIds.includes(item._id);
-
+            const isSold = !!item.finalPrice;
             return (
               <div
                 key={item._id}

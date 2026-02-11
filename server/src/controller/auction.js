@@ -36,6 +36,12 @@ exports.registerForAuction = async (req, res) => {
       req.user.userId
     );
 
+    if (role !== "BIDDER") {
+      return res.status(403).json({
+        message: "Only bidders can register for auctions",
+      });
+    };
+
     res.json({ registered: true });
   } catch (err) {
     res.status(400).json({ message: err.message });

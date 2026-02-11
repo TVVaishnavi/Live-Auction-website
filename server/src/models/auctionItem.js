@@ -40,7 +40,7 @@ const auctionItemSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: ["AVAILABLE", "CLAIMED", "ASSIGNED", "SOLD", "COMPLETED"],
+            enum: ["AVAILABLE", "CLAIMED", "ASSIGNED", "COMPLETED", "SOLD"],
             default: "AVAILABLE",
         },
 

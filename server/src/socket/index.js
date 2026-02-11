@@ -1,6 +1,7 @@
 const { Server } = require("socket.io");
 const { getAuction } = require("./liveState");
 const Auction = require("../models/auction");
+const AuctionItem = require("../models/auctionItem");
 const bidQueues = new Map();
 const processingItems = new Set();
 const highestBidMap = new Map();
@@ -61,7 +62,7 @@ function initSocket(server) {
             ({ auctionId, itemId, amount, userId, userName, userEmail }) => {
                 const auction = getAuction(auctionId);
 
-               if (!["BIDDING", "COUNTDOWN"].includes(auction.status)) return;
+                if (!["BIDDING", "COUNTDOWN"].includes(auction.status)) return;
                 if (!auction.currentItem) return;
                 if (auction.currentItem._id !== itemId) return;
 
@@ -70,10 +71,10 @@ function initSocket(server) {
                 }
 
                 bidQueues.get(itemId).push({
-                    auctionId, 
+                    auctionId,
                     itemId,
                     amount,
-                    userId,  
+                    userId,
                     userName,
                     userEmail,
                     socketId: socket.id,
@@ -139,32 +140,48 @@ function initSocket(server) {
             processingItems.delete(itemId);
         }
 
-        socket.on("host:start-countdown", ({ auctionId }) => {
+        socket.on("host:start-countdown", async ({ auctionId }) => {
             const auction = getAuction(auctionId);
             if (auction.status === "ENDED") return;
 
             auction.status = "COUNTDOWN";
             let count = 3;
 
-            const interval = setInterval(() => {
+            const interval = setInterval(async () => {
                 io.to(`auction:${auctionId}`).emit("countdown", count);
                 count--;
 
                 if (count <= 0) {
                     clearInterval(interval);
-                    countdownTimers.delete(auctionId);
 
                     auction.status = "COMPLETED";
 
-                    io.to(`auction:${auctionId}`).emit("winner-declared", {
-                        winner: auction.highestBid,
-                        bids: auction.bids,
-                        item: auction.currentItem,
-                    });
+                    const winner = auction.highestBid;
+
+                    try {
+                        if (winner && auction.currentItem) {
+                            await AuctionItem.findByIdAndUpdate(
+                                auction.currentItem._id,
+                                {
+                                    status: "COMPLETED",
+                                    winnerName: winner.userName,
+                                    winnerEmail: winner.userEmail,
+                                    finalPrice: winner.amount,
+                                }
+                            );
+                        }
+
+                        io.to(`auction:${auctionId}`).emit("winner-declared", {
+                            winner,
+                            bids: auction.bids,
+                            item: auction.currentItem,
+                        });
+
+                    } catch (err) {
+                        console.error("Failed to finalize item:", err);
+                    }
                 }
             }, 1000);
-
-            countdownTimers.set(auctionId, interval);
         });
 
         socket.on("host:set-item", ({ auctionId, item }) => {

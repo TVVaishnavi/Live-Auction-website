@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuction } from "../hooks/useAuction";
 import RegisteredAuctions from "../components/RegisteredAuctions";
+import socket from "../socket";
 import "../styles/BidderDashboard.css";
 
 function BidderDashboard() {
@@ -12,6 +13,17 @@ function BidderDashboard() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+
+    const handleAuctionEnded = () => fetchData();
+
+    socket.on("auction-ended", handleAuctionEnded);
+
+    return () => socket.off("auction-ended", handleAuctionEnded);
+  }, []);
+
 
   const now = new Date();
 
