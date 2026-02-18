@@ -2,13 +2,13 @@ const AuctionItem = require("../models/auctionItem");
 const Item = require("../models/auction");
 
 exports.getAvailableItems = async () => {
-  return AuctionItem.find({ status: "AVAILABLE" })
+  return AuctionItem.find({ status: { $in: ["AVAILABLE", "UNSOLD"] } })
     .populate("sellerId", "name email");
 };
 
 exports.claimItem = async (itemId, hostId) => {
   return AuctionItem.findOneAndUpdate(
-    { _id: itemId, status: "AVAILABLE" },
+    { _id: itemId, status: { $in: ["AVAILABLE", "UNSOLD"] } },
     { hostId, status: "CLAIMED" },
     { new: true }
   );
@@ -96,4 +96,29 @@ exports.finalizeItem = async ({
 
   await item.save();
   return item;
-};
+}; 
+
+exports.closeAuctionItems = async (auctionId) => {
+  const item = await AuctionItem.find({
+    auctionId, 
+    status: {$in: ["COMPLETED"]}
+  })
+
+  for (const i of item){
+    if(!i.isFinalized){
+      i.status = "UNSOLD";
+
+      i.winnerName = null;
+      i.winnerEmail = null;
+      i.finalPrice = null;
+      i.isFinalized = true;
+
+      i.hostId = null;
+      i.auctionId = null;
+ 
+    }
+    await i.save();
+  }
+
+  return true;
+}

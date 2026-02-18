@@ -18,7 +18,18 @@ export default function HostDashboard() {
   useEffect(() => {
     fetchHostAuctions();
     fetchPreviousAuctions();
+
+    const handleAuctionCreated = () => {
+      fetchHostAuctions(); 
+    };
+
+    window.addEventListener("auction-created", handleAuctionCreated);
+
+    return () => {
+      window.removeEventListener("auction-created", handleAuctionCreated);
+    };
   }, []);
+
 
   useEffect(() => {
     const fetchPrevious = async () => {
@@ -131,7 +142,6 @@ export default function HostDashboard() {
               <p>Status: {auction.status}</p>
             </div>
 
-            {/* Expand Table */}
             {openAuctionId === auction._id && (
               <table>
                 <thead>

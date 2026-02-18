@@ -22,6 +22,10 @@ export function useAuction() {
     return apiFetch(`/items/${itemId}/claim`, "POST");
   };
 
+  const unclaimItem = async (id) => {
+    await apiFetch(`/items/${id}/unclaim`, "PATCH");
+  };
+
   const scheduleAuctionItem = async (itemId, payload) => {
     return apiFetch(`/items/${itemId}/schedule`, "POST", payload);
   };
@@ -74,11 +78,16 @@ export function useAuction() {
   const finalizeItem = (itemId, payload) =>
     apiFetch(`/items/${itemId}/finalize`, "POST", payload);
 
+  const isRegistered = async (auctionId) => {
+    return apiFetch(`/items/auctions/${auctionId}/is-registered`, "GET");
+  }
+
   return {
     createAuctionItem,
     getMyAuctionItems,
     getAvailableItems,
     claimItem,
+    unclaimItem,
     getClaimedItems,
     scheduleAuctionItem,
 
@@ -94,5 +103,6 @@ export function useAuction() {
     completeAuctionItem,
     getAuctionById,
     finalizeItem,
+    isRegistered,
   };
 }

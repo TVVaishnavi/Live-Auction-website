@@ -28,6 +28,7 @@ router.post(
 router.post(
   "/:auctionId/register",
   requireAuth,
+  requireRole("BIDDER"),
   auctionController.registerForAuction
 );
 

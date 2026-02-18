@@ -5,7 +5,8 @@ exports.register = async (req, res) => {
   try {
     const data = await bidderService.registerAuction(
       req.params.auctionId,
-      req.user.userId
+      req.user.userId,
+      req.user.role,
     );
     res.status(201).json(data);
   } catch (err) {

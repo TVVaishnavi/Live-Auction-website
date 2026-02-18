@@ -74,6 +74,7 @@ exports.registerForAuction = async (auctionId, userId) => {
   return auction;
 };
 
+
 exports.moveToNextItem = async (auctionId, hostId) => {
   const auction = await Auction.findOne({
     _id: auctionId,

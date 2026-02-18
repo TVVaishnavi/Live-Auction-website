@@ -10,6 +10,7 @@ function CreateItemModal({ onClose, onCreate }) {
     });
 
     const [images, setImages] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,17 +24,28 @@ function CreateItemModal({ onClose, onCreate }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const imageUrls = await uploadToCloudinary(images);
+        if (isSubmitting) return;
 
-        console.log("SENDING TO BACKEND:", {
-            ...form,
-            images: imageUrls,
-        });
+        try {
+            setIsSubmitting(true);
 
-        onCreate({
-            ...form,
-            images: imageUrls,
-        });
+            const imageUrls = await uploadToCloudinary(images);
+
+            console.log("SENDING TO BACKEND:", {
+                ...form,
+                images: imageUrls,
+            });
+            onCreate({
+                ...form,
+                images: imageUrls,
+            });
+        } catch (error) {
+            console.error("Error creating item:", error);
+        }finally {
+            setIsSubmitting(false);
+        }
+
+
     };
 
 
@@ -96,11 +108,11 @@ function CreateItemModal({ onClose, onCreate }) {
                     />
 
                     <div className="form-actions">
-                        <button type="button" onClick={onClose}>
+                        <button type="button" onClick={onClose} disabled={isSubmitting}>
                             Cancel
                         </button>
-                        <button type="submit" className="primary-btn">
-                            Sell
+                        <button type="submit" className="primary-btn" disabled={isSubmitting}> 
+                            {isSubmitting ? "Creating..." : "Sell"}
                         </button>
                     </div>
                 </form>

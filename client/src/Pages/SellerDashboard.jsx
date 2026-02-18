@@ -30,7 +30,7 @@ function SellerDashboard() {
     };
 
     const activeCount = items.filter(i => i.status === "AVAILABLE").length;
-    const pendingCount = items.filter(i => i.status === "CLAIMED").length;
+    const pendingCount = items.filter(i => i.status === "UNSOLD").length;
     const soldCount = items.filter(i => i.status === "COMPLETED").length;
 
     const totalSales = items

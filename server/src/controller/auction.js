@@ -31,22 +31,23 @@ exports.startAuction = async (req, res) => {
 
 exports.registerForAuction = async (req, res) => {
   try {
-    const auction = await auctionService.registerForAuction(
-      req.params.auctionId,
-      req.user.userId
-    );
-
-    if (role !== "BIDDER") {
+    if (req.user.role !== "BIDDER") {
       return res.status(403).json({
         message: "Only bidders can register for auctions",
       });
-    };
+    }
+
+    await auctionService.registerForAuction(
+      req.params.auctionId,
+      req.user.userId
+    );
 
     res.json({ registered: true });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
+
 
 exports.getLiveAuction = async (req, res) => {
   try {

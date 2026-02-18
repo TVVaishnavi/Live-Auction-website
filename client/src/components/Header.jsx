@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import  { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../hooks/useAuth';
+import axios from "axios";
 import "../styles/Header.css";
 
 export default function Header() {
@@ -11,6 +12,14 @@ export default function Header() {
     const location = useLocation();
     const { getMe } = useAuth();
 
+    const logout = () => {
+        localStorage.removeItem("token");
+        delete axios.defaults.headers.common["Authorization"];
+        setUser(null);
+        setOpen(false);
+        navigate("/login", { replace: true });
+    };
+
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 10);
         window.addEventListener("scroll", onScroll);
@@ -20,6 +29,11 @@ export default function Header() {
 
 
     useEffect(() => {
+        if (location.pathname === "/login" || location.pathname === "/signup") {
+            setUser(null);
+            return;
+        }
+
         const loadUser = async () => {
             try {
                 const res = await getMe();
@@ -32,11 +46,7 @@ export default function Header() {
         loadUser();
     }, [location.pathname]);
 
-    const logout = () => {
-        localStorage.clear();
-        setUser(null);
-        navigate("/login");
-    };
+
 
     const goDashboard = () => {
         if (user.role === "SELLER") navigate("/seller");

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import '../styles/home.css';
 
 function Home() {
-    const { getUpcomingAuctions, registerForAuction } = useAuction();
+    const { getUpcomingAuctions, registerForAuction, isRegistered: checkRegistration } = useAuction();
     const [auctions, setAuctions] = useState([]);
     const [selectedAuction, setSelectedAuction] = useState(null);
     const [isRegistered, setIsRegistered] = useState(false);
@@ -16,6 +16,19 @@ function Home() {
 
     useEffect(() => {
         fetchAuctions();
+    }, []);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const res = await getMe();
+                setUser(res.user);
+            } catch {
+                setUser(null);
+            }
+        };
+
+        fetchUser();
     }, []);
 
     const fetchAuctions = async () => {
@@ -29,10 +42,18 @@ function Home() {
         setAuctions(upcoming);
     };
 
-    const openAuction = (auction) => {
-        setIsRegistered(false);
+    const openAuction = async (auction) => {
         setSelectedAuction(auction);
+
+        try {
+            const res = await checkRegistration(auction._id);
+            setIsRegistered(res.registered);
+        } catch (err) {
+            console.error("Failed to check registration", err);
+            setIsRegistered(false);
+        }
     };
+
 
     const handleRegister = async () => {
         try {
@@ -90,42 +111,76 @@ function Home() {
             {selectedAuction && (
                 <div className="overlay" onClick={() => setSelectedAuction(null)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => setSelectedAuction(null)}>✕</button>
-
-                        <h2 className="page-title">{selectedAuction.title}</h2>
-
-                        <p className="page-subtitle">{selectedAuction.description}</p>
-
-                        {!isRegistered ? (
+                        <div className="modal-header">
+                            <h2>{selectedAuction.title}</h2>
                             <button
-                                onClick={handleRegister}
-                                disabled={user?.role !== "BIDDER"}
+                                className="close-btn"
+                                onClick={() => setSelectedAuction(null)}
                             >
-                                {user?.role === "BIDDER"
-                                    ? "Register"
-                                    : "Only bidders can register"}
+                                ✕
                             </button>
+                        </div>
 
-                        ) : (
-                            <>
-                                <p>✅ You are registered</p>
-                                {canJoinAuction() && (
-                                    <button onClick={handleJoin}>Join Auction</button>
-                                )}
-                            </>
-                        )}
+                        <p className="auction-desc">{selectedAuction.description}</p>
+
+                        <div className="auction-action">
+                            {!isRegistered ? (
+                                <button
+                                    className="primary-action-btn"
+                                    onClick={handleRegister}
+                                    disabled={user?.role !== "BIDDER"}
+                                >
+                                    {user?.role === "BIDDER"
+                                        ? "Register for Auction"
+                                        : "Only bidders can register"}
+                                </button>
+                            ) : (
+                                <>
+                                    <span className="registered-tag">✅ You are registered</span>
+                                    {canJoinAuction() && (
+                                        <button className="join-btn" onClick={handleJoin}>
+                                            Join Auction
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                        </div>
 
                         <h3 className="featured">
                             Featured Items ({selectedAuction.items.length})
                         </h3>
 
                         {selectedAuction.items.map((item, i) => (
-                            <div key={item._id} className="item-card">
-                                <div className="item-header">Item {i + 1}</div>
-                                <h4>{item.title}</h4>
-                                <p className="price">STARTING BID ₹{item.startingPrice}</p>
+                            <div key={item._id} className="featured-row">
+
+                                <div className="featured-image">
+                                    <img
+                                        src={
+                                            item.images && item.images.length > 0
+                                                ? item.images[0]
+                                                : "/placeholder.png"
+                                        }
+                                        alt={item.title}
+                                    />
+                                </div>
+
+                                <div className="featured-details">
+                                    <div className="lot-number">Item {i + 1}</div>
+
+                                    <h4 className="item-title">{item.title}</h4>
+
+                                    <p className="description">
+                                        {item.description}
+                                    </p>
+
+                                    <p className="starting-price">
+                                        Starting Price ₹{item.startingPrice}
+                                    </p>
+                                </div>
+
                             </div>
                         ))}
+
                     </div>
                 </div>
             )}

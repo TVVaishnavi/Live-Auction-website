@@ -160,3 +160,12 @@
   font-weight: 600;
   letter-spacing: 0.5px;
 }
+
+.end-auction-btn {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}

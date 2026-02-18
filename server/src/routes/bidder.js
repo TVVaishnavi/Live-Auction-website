@@ -12,6 +12,7 @@ router.post(
 router.get(
   "/auctions/:auctionId/is-registered",
   requireAuth,
+  requireRole("BIDDER"),
   bidderController.isRegistered
 );
 

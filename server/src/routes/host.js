@@ -58,5 +58,12 @@ router.post(
   hostController.finalizeItem
 );
 
+router.patch(
+  "/:itemId/unclaim",
+  requireAuth,
+  requireRole("HOST"), 
+  hostController.unclaimItem
+);
+
 
 module.exports = router;

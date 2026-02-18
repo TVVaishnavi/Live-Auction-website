@@ -2,6 +2,7 @@ const { Server } = require("socket.io");
 const { getAuction } = require("./liveState");
 const Auction = require("../models/auction");
 const AuctionItem = require("../models/auctionItem");
+const hostService = require("../service/host");
 const bidQueues = new Map();
 const processingItems = new Set();
 const highestBidMap = new Map();
@@ -204,15 +205,20 @@ function initSocket(server) {
 
         socket.on("auction-ended", async ({ auctionId }) => {
             try {
+                console.log("Host manually ended auction:", auctionId);
                 await Auction.findByIdAndUpdate(auctionId, {
                     status: "COMPLETED",
                 });
+                await hostService.closeAuctionItems(auctionId);
 
+                console.log("Unsold items returned to inventory");
                 io.to(`auction:${auctionId}`).emit("auction-ended");
+
             } catch (err) {
                 console.error("Failed to end auction:", err);
             }
         });
+
 
         socket.on("disconnect", () => {
             console.log("Socket disconnected:", socket.id);

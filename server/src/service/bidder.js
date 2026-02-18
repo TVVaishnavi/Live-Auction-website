@@ -1,9 +1,12 @@
 const Auction = require("../models/auction");
 const AuctionItem = require("../models/auctionItem");
 
-exports.registerAuction = async (auctionId, userId) => {
+exports.registerAuction = async (auctionId, userId, role) => {
   const auction = await Auction.findById(auctionId);
-
+  if(role !== "BIDDER"){
+    throw new Error("Only bidders can register for auctions");
+  }
+  
   if (!auction) {
     throw new Error("Auction not found");
   }
@@ -13,7 +16,7 @@ exports.registerAuction = async (auctionId, userId) => {
   }
 
   if (auction.registeredUsers.includes(userId)) {
-    throw new Error("Already registered");
+    return { registered: true };
   }
 
   auction.registeredUsers.push(userId);

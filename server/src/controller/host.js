@@ -1,5 +1,6 @@
 const hostService = require("../service/host");
 const Auction = require("../models/auction");
+const AuctionItem = require("../models/auctionItem");
 
 exports.availableItems = async (req, res) => {
   const items = await hostService.getAvailableItems();
@@ -93,5 +94,26 @@ exports.finalizeItem = async (req, res) => {
     res.json(item);
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+exports.unclaimItem = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+
+    const item = await AuctionItem.findByIdAndUpdate(
+      itemId,
+      { status: "AVAILABLE" },  
+      { new: true }
+    );
+
+    if (!item) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+
+    res.json(item);
+  } catch (err) {
+    console.error("UNCLAIM ERROR:", err);  
+    res.status(500).json({ message: "Failed to unclaim item" });
   }
 };
